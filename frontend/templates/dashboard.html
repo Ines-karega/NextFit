@@ -2,7 +2,8 @@
 {% from "_card.html" import card, filters with context %}
 {% block title %}My matches{% endblock %}
 {% block content %}
-<h1>My matches</h1>
+<h1>Hello, {{ user['name'].split()[0] }}!</h1>
+<p>Here are the opportunities that fit you.</p>
 
 {% for r in reminders %}
   <div class="reminder">

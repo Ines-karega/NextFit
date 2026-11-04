@@ -8,7 +8,7 @@
 </head>
 <body>
   <header>
-    <a class="logo" href="{{ url_for('home') }}">NextFit</a>
+    <a class="logo" href="{{ url_for('home') }}">Next<span>Fit</span></a>
     <nav>
       <a href="{{ url_for('home') }}">Home</a>
       {% if user and user['role'] == 'SEEKER' %}

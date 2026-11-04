@@ -1,7 +1,7 @@
 {# One opportunity card. m = match result, saved = list of saved ids, next_url = where to return #}
 {% macro card(m, saved, next_url, show_status=false) %}
 {% set o = m['opp'] %}
-<div class="card">
+<div class="card {{ o['type'] | lower }}">
   <h3>{{ o['title'] }}</h3>
   <span class="badge">{{ TYPE_LABEL[o['type']] }}</span>
   <span class="badge">{{ MODE_LABEL[o['work_mode']] }}</span>

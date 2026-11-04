@@ -3,14 +3,19 @@
 {% block content %}
 <div class="hero">
   <h1>Find the opportunities you already qualify for</h1>
-  <p>NextFit matches your age, education and skills with trainings, internships and jobs in Rwanda. The closest deadlines come first, and we show you why each one matched.</p>
-  <p><a class="button" href="{{ url_for('signup') }}">Create my profile</a>
-     <a class="button grey" href="{{ url_for('login') }}">I have an account</a></p>
+  <p>Trainings, internships and jobs in Rwanda, matched to your age, education and skills. The closest deadlines come first, and we show you why each one fits.</p>
+  <div class="actions">
+    <a class="button big" href="{{ url_for('signup') }}">Create my free profile</a>
+    <a class="button grey big" href="{{ url_for('login') }}">Log in</a>
+  </div>
 </div>
+
 <h2>How it works</h2>
-<ol>
-  <li>Sign up and tell us your age, district, education and skills.</li>
-  <li>See a short list made just for you, nearest deadlines first.</li>
-  <li>Save what you like and get a reminder when a deadline is 14 days away.</li>
-</ol>
+<div class="steps">
+  <div class="step"><div class="icon">&#128221;</div><h3>1. Tell us about you</h3><p>Your age, district, education and skills. It takes about 2 minutes.</p></div>
+  <div class="step"><div class="icon">&#127919;</div><h3>2. See your matches</h3><p>A short list made for you, with your own district first.</p></div>
+  <div class="step"><div class="icon">&#9200;</div><h3>3. Never miss a deadline</h3><p>Save what you like and get a reminder when it is closing soon.</p></div>
+</div>
+
+<div class="promise">No long lists. No guessing. Just the opportunities that fit you.</div>
 {% endblock %}
