@@ -498,5 +498,21 @@ def admin_remove_user(person_id):
     return redirect(url_for("admin_users"))
 
 
+# ---------------- friendly error pages (NFR5) ----------------
+@app.errorhandler(403)
+def error_403(e):
+    return render_template("error.html", msg="You do not have permission to open this page."), 403
+
+
+@app.errorhandler(404)
+def error_404(e):
+    return render_template("error.html", msg="We could not find that page."), 404
+
+
+@app.errorhandler(500)
+def error_500(e):
+    return render_template("error.html", msg="Something went wrong on our side. Please try again in a moment."), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)
