@@ -242,5 +242,46 @@ def profile():
     return render_template("profile.html", errors=errors, form=get_profile(user["id"]) or {})
 
 
+# ---------------- FR4, FR5, FR6: dashboard ----------------
+@app.route("/dashboard")
+def dashboard():
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    my_profile = get_profile(user["id"])
+    if my_profile is None:
+        flash("Please fill in your profile first so we can find your matches.", "info")
+        return redirect(url_for("profile"))
+
+    # NFR5: if matching fails, explain what happened instead of showing an empty page
+    try:
+        all_matches = matching.get_matches(my_profile, get_all_opportunities())
+    except Exception:
+        flash("Sorry, we could not work out your matches just now. Please refresh, or browse all opportunities.", "error")
+        return redirect(url_for("browse"))
+    shown = filter_results(all_matches)
+    nearby = [m for m in shown if m["in_district"]]       # FR5.3: own district first
+    elsewhere = [m for m in shown if not m["in_district"]]
+    return render_template("dashboard.html", nearby=nearby, elsewhere=elsewhere,
+                           total=len(all_matches), shown=len(shown),
+                           saved=get_saved_ids(user["id"]), reminders=get_reminders(user["id"]),
+                           args=request.args)
+
+
+# ---------------- FR9: browse everything ----------------
+@app.route("/browse")
+def browse():
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    my_profile = get_profile(user["id"])
+    if my_profile is None:
+        return redirect(url_for("profile"))
+    results = [matching.check(my_profile, o) for o in get_all_opportunities() if matching.is_open(o)]
+    results.sort(key=lambda r: r["opp"]["deadline"])
+    return render_template("browse.html", items=filter_results(results),
+                           saved=get_saved_ids(user["id"]), args=request.args)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
