@@ -1,0 +1,67 @@
+{# One opportunity card. m = match result, saved = list of saved ids, next_url = where to return #}
+{% macro card(m, saved, next_url, show_status=false) %}
+{% set o = m['opp'] %}
+<div class="card">
+  <h3>{{ o['title'] }}</h3>
+  <span class="badge">{{ TYPE_LABEL[o['type']] }}</span>
+  <span class="badge">{{ MODE_LABEL[o['work_mode']] }}</span>
+  <span class="badge">{{ o['district'] }}, {{ o['province'] }}</span>
+  {% if m['in_district'] %}<span class="badge full">Your district</span>{% endif %}
+  {% if m['skill_match'] == 'FULL' %}<span class="badge full">Full skill match</span>
+  {% elif m['skill_match'] == 'PARTIAL' %}<span class="badge warn">Partial skill match</span>
+  {% else %}<span class="badge warn">No skill match</span>{% endif %}
+  {% if show_status %}
+    {% if m['eligible'] %}<span class="badge full">You qualify</span>
+    {% else %}<span class="badge warn">You do not meet every requirement</span>{% endif %}
+  {% endif %}
+
+  <p>{{ o['description'] }}</p>
+  <p>
+    Deadline: {{ o['deadline'] }} -
+    {% if m['days_left'] < 0 %}<span class="urgent">closed</span>
+    {% elif m['days_left'] <= 7 %}<span class="urgent">{{ m['days_left'] }} day(s) left</span>
+    {% else %}{{ m['days_left'] }} days left{% endif %}
+  </p>
+
+  <strong>Why this {% if show_status and not m['eligible'] %}does not fully match{% else %}matched you{% endif %}:</strong>
+  <ul class="reasons">
+    {% for passed, sentence in m['reasons'] %}
+      <li class="{{ 'yes' if passed else 'no' }}">{{ sentence }}</li>
+    {% endfor %}
+  </ul>
+
+  <p>
+    <a class="button" href="{{ o['apply_link'] }}" target="_blank" rel="noopener">Apply</a>
+    {% if o['id'] in saved %}
+      <form class="inline" method="post" action="{{ url_for('unsave', opp_id=o['id']) }}">
+        <input type="hidden" name="next" value="{{ next_url }}"><button class="grey">Remove from saved</button>
+      </form>
+    {% else %}
+      <form class="inline" method="post" action="{{ url_for('save', opp_id=o['id']) }}">
+        <input type="hidden" name="next" value="{{ next_url }}"><button class="grey">Save</button>
+      </form>
+    {% endif %}
+  </p>
+  <p class="safety">Stay safe: NextFit cannot check that listings are genuine. Verify every opportunity yourself, and never pay a fee or share sensitive personal information before you do.</p>
+</div>
+{% endmacro %}
+
+{# Search box and filters (FR6) #}
+{% macro filters(args) %}
+<form class="filters" method="get">
+  <div class="row">
+    <div><label for="q">Search</label><input id="q" name="q" value="{{ args.get('q', '') }}" placeholder="Title or keyword"></div>
+    <div><label for="type">Type</label>
+      <select id="type" name="type"><option value="">Any type</option>
+        {% for value, label in OPP_TYPES %}<option value="{{ value }}" {{ 'selected' if args.get('type') == value }}>{{ label }}</option>{% endfor %}
+      </select></div>
+    <div><label for="province">Province</label>
+      <select id="province" name="province" class="province"><option value="">Any province</option>
+        {% for p in LOCATIONS %}<option {{ 'selected' if args.get('province') == p }}>{{ p }}</option>{% endfor %}
+      </select></div>
+    <div><label for="district">District</label>
+      <select id="district" name="district" class="district" data-empty="Any district" data-selected="{{ args.get('district', '') }}"></select></div>
+  </div>
+  <p><button>Search</button> <a href="?">Clear</a></p>
+</form>
+{% endmacro %}
