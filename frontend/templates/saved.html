@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_card.html" import card with context %}
+{% block title %}Saved{% endblock %}
+{% block content %}
+<h1>My saved opportunities</h1>
+{% for r in reminders %}
+  <div class="reminder">
+    <strong>Deadline reminder:</strong> {{ r['opp']['title'] }} closes in
+    <span class="urgent">{{ r['days_left'] }} day(s)</span>.
+  </div>
+{% endfor %}
+{% for m in items %}
+  {% if m['expired'] %}<p class="urgent">This one is no longer open.</p>{% endif %}
+  {{ card(m, saved, url_for('saved_page'), true) }}
+{% else %}
+  <div class="card"><p>You have not saved anything yet. Press "Save" on an opportunity to keep it here.</p></div>
+{% endfor %}
+{% endblock %}
