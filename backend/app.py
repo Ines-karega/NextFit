@@ -262,7 +262,7 @@ def dashboard():
     shown = filter_results(all_matches)
     nearby = [m for m in shown if m["in_district"]]       # FR5.3: own district first
     elsewhere = [m for m in shown if not m["in_district"]]
-    return render_template("dashboard.html", nearby=nearby, elsewhere=elsewhere,
+    return render_template("dashboard.html", my_profile=my_profile, nearby=nearby, elsewhere=elsewhere,
                            total=len(all_matches), shown=len(shown),
                            saved=get_saved_ids(user["id"]), reminders=get_reminders(user["id"]),
                            args=request.args)

@@ -3,7 +3,9 @@
 {% block title %}My matches{% endblock %}
 {% block content %}
 <h1>Hello, {{ user['name'].split()[0] }}!</h1>
-<p>Here are the opportunities that fit you.</p>
+<p>Here are the opportunities that fit you.
+   Your district: <strong>{{ my_profile['district'] }}, {{ my_profile['province'] }}</strong>
+   (<a href="{{ url_for('profile') }}">change</a>)</p>
 
 {% for r in reminders %}
   <div class="reminder">
@@ -27,12 +29,13 @@
   <p>{{ shown }} match(es) for you, closest deadline first.</p>
 
   {% if nearby %}
-    <h2>In your district</h2>
+    <h2>In your district ({{ my_profile['district'] }})</h2>
     {% for m in nearby %}{{ card(m, saved, request.full_path) }}{% endfor %}
   {% endif %}
 
   {% if elsewhere %}
-    <h2>In other districts</h2>
+    <h2>Outside your district</h2>
+    <p>These are in other districts. They match you too, but you may need to travel.</p>
     {% for m in elsewhere %}{{ card(m, saved, request.full_path) }}{% endfor %}
   {% endif %}
 {% endif %}

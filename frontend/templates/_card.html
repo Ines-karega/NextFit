@@ -5,8 +5,9 @@
   <h3>{{ o['title'] }}</h3>
   <span class="badge">{{ TYPE_LABEL[o['type']] }}</span>
   <span class="badge">{{ MODE_LABEL[o['work_mode']] }}</span>
-  <span class="badge">{{ o['district'] }}, {{ o['province'] }}</span>
-  {% if m['in_district'] %}<span class="badge full">Your district</span>{% endif %}
+  <span class="badge">Location: {{ o['district'] }}, {{ o['province'] }}</span>
+  {% if m['in_district'] %}<span class="badge full">In your district ({{ o['district'] }})</span>
+  {% else %}<span class="badge warn">Outside your district</span>{% endif %}
   {% if m['skill_match'] == 'FULL' %}<span class="badge full">Full skill match</span>
   {% elif m['skill_match'] == 'PARTIAL' %}<span class="badge warn">Partial skill match</span>
   {% else %}<span class="badge warn">No skill match</span>{% endif %}
@@ -55,11 +56,11 @@
       <select id="type" name="type"><option value="">Any type</option>
         {% for value, label in OPP_TYPES %}<option value="{{ value }}" {{ 'selected' if args.get('type') == value }}>{{ label }}</option>{% endfor %}
       </select></div>
-    <div><label for="province">Province</label>
+    <div><label for="province">Province of the opportunity</label>
       <select id="province" name="province" class="province"><option value="">Any province</option>
         {% for p in LOCATIONS %}<option {{ 'selected' if args.get('province') == p }}>{{ p }}</option>{% endfor %}
       </select></div>
-    <div><label for="district">District</label>
+    <div><label for="district">District of the opportunity</label>
       <select id="district" name="district" class="district" data-empty="Any district" data-selected="{{ args.get('district', '') }}"></select></div>
   </div>
   <p><button>Search</button> <a href="?">Clear</a></p>
