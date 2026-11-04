@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Welcome, {{ user['name'].split()[0] }}</h1>
+  <p>Keep the opportunities accurate and up to date so seekers get good matches.</p>
+  <div class="actions">
+    <a class="button big" href="{{ url_for('admin_add') }}">Add opportunity</a>
+    <a class="button grey big" href="{{ url_for('admin_opportunities') }}">Manage opportunities</a>
+  </div>
+</div>
+
+<h2>At a glance</h2>
+<div class="steps">
+  <div class="step"><div class="icon">&#9989;</div><h3>{{ counts['open'] }} open</h3><p>Opportunities seekers can see.</p></div>
+  <div class="step"><div class="icon">&#128274;</div><h3>{{ counts['closed'] }} closed</h3><p>Hidden from seekers.</p></div>
+  <div class="step"><div class="icon">&#128101;</div><h3>{{ counts['seekers'] }} seekers</h3><p><a href="{{ url_for('admin_users') }}">Manage users</a></p></div>
+</div>
+{% endblock %}

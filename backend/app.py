@@ -99,9 +99,25 @@ def home():
     user = current_user()
     if user is None:
         return render_template("home.html")
+    conn = db.connect()
     if user["role"] == "ADMIN":
-        return redirect(url_for("admin_opportunities"))
-    return redirect(url_for("dashboard"))
+        counts = {
+            "open": conn.execute("SELECT COUNT(*) FROM opportunities WHERE status = 'OPEN'").fetchone()[0],
+            "closed": conn.execute("SELECT COUNT(*) FROM opportunities WHERE status = 'CLOSED'").fetchone()[0],
+            "seekers": conn.execute("SELECT COUNT(*) FROM users WHERE role = 'SEEKER'").fetchone()[0],
+        }
+        conn.close()
+        return render_template("home_admin.html", counts=counts)
+    conn.close()
+
+    # Seeker home: a short summary of what is waiting for them
+    my_profile = get_profile(user["id"])
+    match_count = 0
+    if my_profile is not None:
+        match_count = len(matching.get_matches(my_profile, get_all_opportunities()))
+    return render_template("home_seeker.html", my_profile=my_profile, match_count=match_count,
+                           saved_count=len(get_saved_ids(user["id"])),
+                           reminders=get_reminders(user["id"])[:3])
 
 
 @app.route("/help")

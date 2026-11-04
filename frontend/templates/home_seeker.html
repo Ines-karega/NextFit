@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Welcome back, {{ user['name'].split()[0] }}!</h1>
+  {% if my_profile %}
+    <p>You have <strong>{{ match_count }}</strong> opportunit{{ 'y' if match_count == 1 else 'ies' }} that fit you right now.</p>
+    <div class="actions">
+      <a class="button big" href="{{ url_for('dashboard') }}">See my matches</a>
+      <a class="button grey big" href="{{ url_for('browse') }}">Browse all</a>
+    </div>
+  {% else %}
+    <p>Tell us about yourself so we can find opportunities that fit you.</p>
+    <div class="actions"><a class="button big" href="{{ url_for('profile') }}">Complete my profile</a></div>
+  {% endif %}
+</div>
+
+{% if reminders %}
+  <h2>Closing soon</h2>
+  {% for r in reminders %}
+    <div class="reminder"><strong>{{ r['opp']['title'] }}</strong> closes in
+      <span class="urgent">{{ r['days_left'] }} day(s)</span> ({{ r['opp']['deadline'] }}).</div>
+  {% endfor %}
+{% endif %}
+
+<h2>Quick links</h2>
+<div class="steps">
+  <div class="step"><div class="icon">&#127919;</div><h3>My matches</h3><p>{{ match_count }} for you.</p><p><a href="{{ url_for('dashboard') }}">Open</a></p></div>
+  <div class="step"><div class="icon">&#11088;</div><h3>Saved</h3><p>{{ saved_count }} saved.</p><p><a href="{{ url_for('saved_page') }}">Open</a></p></div>
+  <div class="step"><div class="icon">&#128221;</div><h3>My profile</h3><p>Keep it up to date.</p><p><a href="{{ url_for('profile') }}">Edit</a></p></div>
+</div>
+{% endblock %}
