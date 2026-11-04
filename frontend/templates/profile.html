@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<h1>My profile</h1>
+<p>Update this any time your situation changes. Your matches update straight away.</p>
+<form method="post">
+  <label for="age">Age</label>
+  <input id="age" name="age" type="number" value="{{ form['age'] if form['age'] is defined else '' }}">
+  {% if errors.age %}<p class="error">{{ errors.age }}</p>{% endif %}
+
+  <label for="province">Province</label>
+  <select id="province" name="province" class="province">
+    <option value="">Choose province</option>
+    {% for p in LOCATIONS %}<option {{ 'selected' if form['province'] == p }}>{{ p }}</option>{% endfor %}
+  </select>
+
+  <label for="district">District</label>
+  <select id="district" name="district" class="district" data-selected="{{ form['district'] or '' }}"></select>
+  {% if errors.district %}<p class="error">{{ errors.district }}</p>{% endif %}
+
+  <label for="education">Education level</label>
+  <select id="education" name="education">
+    <option value="">Choose education level</option>
+    {% for value, label in EDUCATION_LEVELS %}<option value="{{ value }}" {{ 'selected' if form['education'] == value }}>{{ label }}</option>{% endfor %}
+  </select>
+  {% if errors.education %}<p class="error">{{ errors.education }}</p>{% endif %}
+
+  <label for="status">What describes you now?</label>
+  <select id="status" name="status">
+    <option value="">Choose one</option>
+    {% for s in STATUSES %}<option {{ 'selected' if form['status'] == s }}>{{ s }}</option>{% endfor %}
+  </select>
+  {% if errors.status %}<p class="error">{{ errors.status }}</p>{% endif %}
+
+  <label for="skills">Your skills (separate with commas)</label>
+  <textarea id="skills" name="skills" rows="3" placeholder="Example: Excel, Communication, English">{{ form['skills'] or '' }}</textarea>
+  {% if errors.skills %}<p class="error">{{ errors.skills }}</p>{% endif %}
+
+  <p><button>Save profile</button></p>
+</form>
+{% endblock %}
