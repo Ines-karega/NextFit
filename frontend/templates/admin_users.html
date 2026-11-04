@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Manage users{% endblock %}
+{% block content %}
+<h1>User accounts</h1>
+<div class="table-wrap">
+<table>
+  <tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>
+  {% for p in people %}
+  <tr>
+    <td>{{ p['name'] }}</td><td>{{ p['email'] }}</td><td>{{ p['role'] }}</td>
+    <td>{% if p['id'] != user['id'] %}
+      <form class="inline" method="post" action="{{ url_for('admin_remove_user', person_id=p['id']) }}" onsubmit="return confirm('Remove this account?')"><button class="red">Remove</button></form>
+    {% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+
+<h2>Create another admin</h2>
+<form method="post">
+  <label for="name">Name</label><input id="name" name="name" value="{{ form.get('name', '') }}">
+  {% if errors.name %}<p class="error">{{ errors.name }}</p>{% endif %}
+  <label for="email">Email</label><input id="email" name="email" type="email" value="{{ form.get('email', '') }}">
+  {% if errors.email %}<p class="error">{{ errors.email }}</p>{% endif %}
+  <label for="password">Password (at least 8 characters)</label><input id="password" name="password" type="password">
+  {% if errors.password %}<p class="error">{{ errors.password }}</p>{% endif %}
+  <p><button>Create admin</button></p>
+</form>
+{% endblock %}
