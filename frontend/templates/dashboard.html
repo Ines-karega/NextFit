@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_card.html" import card, filters with context %}
+{% block title %}My matches{% endblock %}
+{% block content %}
+<h1>My matches</h1>
+
+{% for r in reminders %}
+  <div class="reminder">
+    <strong>Deadline reminder:</strong> {{ r['opp']['title'] }} closes in
+    <span class="urgent">{{ r['days_left'] }} day(s)</span> ({{ r['opp']['deadline'] }}).
+  </div>
+{% endfor %}
+
+{{ filters(args) }}
+
+{% if total == 0 %}
+  <div class="card">
+    <h3>No matches yet</h3>
+    <p>No open opportunity fits your profile right now. Try updating your skills, or look at everything that is open.</p>
+    <a class="button" href="{{ url_for('browse') }}">Browse all opportunities</a>
+    <a class="button grey" href="{{ url_for('profile') }}">Edit my profile</a>
+  </div>
+{% elif shown == 0 %}
+  <div class="card"><p>None of your {{ total }} matches fit that search. <a href="?">Clear the search</a>.</p></div>
+{% else %}
+  <p>{{ shown }} match(es) for you, closest deadline first.</p>
+
+  {% if nearby %}
+    <h2>In your district</h2>
+    {% for m in nearby %}{{ card(m, saved, request.full_path) }}{% endfor %}
+  {% endif %}
+
+  {% if elsewhere %}
+    <h2>In other districts</h2>
+    {% for m in elsewhere %}{{ card(m, saved, request.full_path) }}{% endfor %}
+  {% endif %}
+{% endif %}
+{% endblock %}

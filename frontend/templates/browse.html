@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% from "_card.html" import card, filters with context %}
+{% block title %}Browse all{% endblock %}
+{% block content %}
+<h1>All open opportunities</h1>
+<p>This list includes opportunities you may not qualify for. Each card shows what you meet and what is missing.</p>
+{{ filters(args) }}
+{% for m in items %}
+  {{ card(m, saved, request.full_path, true) }}
+{% else %}
+  <div class="card"><p>No opportunities found.</p></div>
+{% endfor %}
+{% endblock %}
