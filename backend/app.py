@@ -283,5 +283,48 @@ def browse():
                            saved=get_saved_ids(user["id"]), args=request.args)
 
 
+# ---------------- FR7, FR8: saved opportunities ----------------
+@app.route("/saved")
+def saved_page():
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    my_profile = get_profile(user["id"])
+    if my_profile is None:
+        return redirect(url_for("profile"))
+    ids = get_saved_ids(user["id"])
+    items = [matching.check(my_profile, o) for o in get_all_opportunities() if o["id"] in ids]
+    for item in items:
+        item["expired"] = not matching.is_open(item["opp"])
+    items.sort(key=lambda r: r["opp"]["deadline"])
+    return render_template("saved.html", items=items, saved=ids, reminders=get_reminders(user["id"]))
+
+
+@app.route("/save/<int:opp_id>", methods=["POST"])
+def save(opp_id):
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    conn = db.connect()
+    conn.execute("INSERT OR IGNORE INTO saved (user_id, opportunity_id) VALUES (?, ?)", (user["id"], opp_id))
+    conn.commit()
+    conn.close()
+    flash("Saved to your shortlist.", "success")
+    return redirect(request.form.get("next") or url_for("saved_page"))
+
+
+@app.route("/unsave/<int:opp_id>", methods=["POST"])
+def unsave(opp_id):
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    conn = db.connect()
+    conn.execute("DELETE FROM saved WHERE user_id = ? AND opportunity_id = ?", (user["id"], opp_id))
+    conn.commit()
+    conn.close()
+    flash("Removed from your shortlist.", "info")
+    return redirect(request.form.get("next") or url_for("saved_page"))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
