@@ -207,5 +207,40 @@ def reset(token):
     return render_template("reset.html")
 
 
+# ---------------- FR2: seeker profile ----------------
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    user = current_user()
+    if user is None or user["role"] != "SEEKER":
+        return redirect(url_for("login"))
+    errors = {}
+    if request.method == "POST":
+        form = request.form
+        age = form["age"]
+        if not age.isdigit() or not MIN_SEEKER_AGE <= int(age) <= MAX_SEEKER_AGE:
+            errors["age"] = f"Please enter an age from {MIN_SEEKER_AGE} to {MAX_SEEKER_AGE}."
+        if not valid_location(form["province"], form["district"]):
+            errors["district"] = "Please choose your province, then your district."
+        if form["education"] not in EDU_LABEL:
+            errors["education"] = "Please choose your education level."
+        if form["status"] not in STATUSES:
+            errors["status"] = "Please choose your current situation."
+        skills = matching.split_skills(form["skills"])
+        if len(skills) == 0:
+            errors["skills"] = "Please write at least one skill, separated by commas."
+        if not errors:
+            conn = db.connect()
+            conn.execute("DELETE FROM profiles WHERE user_id = ?", (user["id"],))
+            conn.execute("INSERT INTO profiles VALUES (?, ?, ?, ?, ?, ?, ?)",
+                         (user["id"], int(age), form["province"], form["district"],
+                          form["education"], form["status"], ", ".join(skills)))
+            conn.commit()
+            conn.close()
+            flash("Profile saved.", "success")
+            return redirect(url_for("dashboard"))
+        return render_template("profile.html", errors=errors, form=form)
+    return render_template("profile.html", errors=errors, form=get_profile(user["id"]) or {})
+
+
 if __name__ == "__main__":
     app.run(debug=True)
