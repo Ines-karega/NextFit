@@ -61,3 +61,33 @@ To start fresh, stop the server, delete `nextfit.db`, and start again.
 
 Or click **Sign up** to make your own seeker account. Admins cannot sign up publicly (SRS FR1.1): the first admin is
 created by the program on first start, and only an admin can create more.
+
+## Turn on password reset emails (optional on your computer, needed on the live site)
+
+NextFit sends the email through any free SMTP service. The easiest is a Gmail account:
+
+1. In your Google account turn on **2-Step Verification**, then create an **App password**
+   (Google Account > Security > App passwords). Copy the 16-letter password.
+2. Set these four settings before starting the site (never write them inside the code or upload them to GitHub).
+
+   Windows PowerShell:
+   ```
+   $env:SMTP_HOST = "smtp.gmail.com"
+   $env:SMTP_PORT = "587"
+   $env:SMTP_USER = "your.address@gmail.com"
+   $env:SMTP_PASSWORD = "your-16-letter-app-password"
+   python backend/app.py
+   ```
+   Mac / Linux: use `export SMTP_HOST=smtp.gmail.com` and so on.
+   On a hosting site (such as Render), add the same four names under **Environment variables**.
+3. Open **Log in > Forgot your password?**, type an account's email, and check that inbox.
+
+## Important notes
+
+- The 22 opportunities are **sample data** (links go to example.org). Their deadlines are set relative to today so the
+  demo always has open opportunities. One has an expired deadline on purpose, to show that expired ones stay hidden.
+- **Forgot password:** the reset link is **emailed** to the user and works for 1 hour. This needs the email settings
+  below. If they are not set (for example when you just run it on your computer), the link is shown on the screen
+  instead ("demo mode") so you can still try it.
+- Before going live, set a private `SECRET_KEY`, and `ADMIN_EMAIL` / `ADMIN_PASSWORD` for the first admin.
+  Set `NEXTFIT_SEED=0` to skip the sample data.
