@@ -18,3 +18,46 @@ remove opportunities, see in-app reminders when a saved deadline is 14 days away
 
 **Admin:** add, edit, close and remove opportunities (with age range, accepted education levels and required skills),
 view and remove user accounts, create other admin accounts.
+
+## Run it on your computer (every step)
+
+You need **Python 3.10 or newer**. Download it from https://www.python.org/downloads/ and, in the installer,
+tick **"Add python.exe to PATH"**.
+
+1. Download the code and open a terminal in the project folder:
+   ```
+   git clone https://github.com/YOUR-USERNAME/NextFit.git
+   cd NextFit
+   ```
+2. Create a virtual environment (a private box for this project's libraries):
+   ```
+   python -m venv venv
+   ```
+3. Turn it on.
+   - Windows (PowerShell): `venv\Scripts\Activate.ps1`
+   - Windows (Command Prompt): `venv\Scripts\activate.bat`
+   - Mac / Linux: `source venv/bin/activate`
+
+   (If PowerShell blocks it, run `Set-ExecutionPolicy -Scope Process Bypass` first, then try again.)
+4. Install the libraries:
+   ```
+   pip install -r requirements.txt
+   ```
+5. Start the website:
+   ```
+   python backend/app.py
+   ```
+6. Open http://127.0.0.1:5000 in your browser.
+
+The database file `nextfit.db` is created automatically the first time, with 22 sample opportunities.
+To start fresh, stop the server, delete `nextfit.db`, and start again.
+
+## Demo accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Seeker (profile already filled in) | seeker@nextfit.rw | Seeker123! |
+| Admin | admin@nextfit.rw | Admin123! |
+
+Or click **Sign up** to make your own seeker account. Admins cannot sign up publicly (SRS FR1.1): the first admin is
+created by the program on first start, and only an admin can create more.
