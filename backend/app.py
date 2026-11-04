@@ -326,5 +326,177 @@ def unsave(opp_id):
     return redirect(request.form.get("next") or url_for("saved_page"))
 
 
+# ---------------- FR3, FR10: admin ----------------
+def admin_only():
+    """Returns the admin user, or None if the visitor is not an admin."""
+    user = current_user()
+    if user is None or user["role"] != "ADMIN":
+        return None
+    return user
+
+
+def check_opportunity_form(form):
+    """Returns a list of error messages (empty list = form is fine)."""
+    errors = {}
+    for field in ["title", "description", "apply_link"]:
+        if form[field].strip() == "":
+            errors[field] = "This field is required."
+    if form["type"] not in TYPE_LABEL:
+        errors["type"] = "Please choose a type."
+    if form["work_mode"] not in MODE_LABEL:
+        errors["work_mode"] = "Please choose a work mode."
+    if not valid_location(form["province"], form["district"]):
+        errors["district"] = "Please choose a province and a district."
+    try:
+        date.fromisoformat(form["deadline"])
+    except ValueError:
+        errors["deadline"] = "Please choose a deadline date."
+    if not (form["min_age"].isdigit() and form["max_age"].isdigit()) or int(form["min_age"]) > int(form["max_age"]):
+        errors["age"] = "Enter a minimum and maximum age (minimum cannot be bigger)."
+    if len(form.getlist("education")) == 0:
+        errors["education"] = "Choose at least one education level."
+    return errors
+
+
+def opportunity_values(form):
+    """The form fields in the order of the database columns used below."""
+    return (form["title"].strip(), form["description"].strip(), form["type"],
+            ", ".join(matching.split_skills(form["required_skills"])), form["province"],
+            form["district"], form["work_mode"], form["deadline"], form["apply_link"].strip(),
+            int(form["min_age"]), int(form["max_age"]), ",".join(form.getlist("education")))
+
+
+COLUMNS = ("title, description, type, required_skills, province, district, "
+           "work_mode, deadline, apply_link, min_age, max_age, education")
+
+
+@app.route("/admin/opportunities")
+def admin_opportunities():
+    if admin_only() is None:
+        abort(403)
+    conn = db.connect()
+    rows = conn.execute("SELECT * FROM opportunities ORDER BY status, deadline").fetchall()
+    conn.close()
+    return render_template("admin_opps.html", opps=rows)
+
+
+@app.route("/admin/opportunities/new", methods=["GET", "POST"])
+def admin_add():
+    if admin_only() is None:
+        abort(403)
+    errors = {}
+    if request.method == "POST":
+        errors = check_opportunity_form(request.form)
+        if not errors:
+            conn = db.connect()
+            conn.execute(f"INSERT INTO opportunities ({COLUMNS}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                         opportunity_values(request.form))
+            conn.commit()
+            conn.close()
+            flash("Opportunity added.", "success")
+            return redirect(url_for("admin_opportunities"))
+        return render_template("admin_form.html", errors=errors, o=request.form,
+                               chosen=request.form.getlist("education"), title="Add opportunity")
+    return render_template("admin_form.html", errors=errors, o={"min_age": 16, "max_age": 30},
+                           chosen=[], title="Add opportunity")
+
+
+@app.route("/admin/opportunities/<int:opp_id>/edit", methods=["GET", "POST"])
+def admin_edit(opp_id):
+    if admin_only() is None:
+        abort(403)
+    conn = db.connect()
+    opp = conn.execute("SELECT * FROM opportunities WHERE id = ?", (opp_id,)).fetchone()
+    if opp is None:
+        conn.close()
+        abort(404)
+    if request.method == "POST":
+        errors = check_opportunity_form(request.form)
+        if not errors:
+            conn.execute(f"UPDATE opportunities SET ({COLUMNS}) = (?,?,?,?,?,?,?,?,?,?,?,?) WHERE id = ?",
+                         opportunity_values(request.form) + (opp_id,))
+            conn.commit()
+            conn.close()
+            flash("Opportunity updated.", "success")
+            return redirect(url_for("admin_opportunities"))
+        conn.close()
+        return render_template("admin_form.html", errors=errors, o=request.form,
+                               chosen=request.form.getlist("education"), title="Edit opportunity")
+    conn.close()
+    return render_template("admin_form.html", errors={}, o=opp,
+                           chosen=opp["education"].split(","), title="Edit opportunity")
+
+
+@app.route("/admin/opportunities/<int:opp_id>/close", methods=["POST"])
+def admin_close(opp_id):
+    if admin_only() is None:
+        abort(403)
+    conn = db.connect()
+    conn.execute("UPDATE opportunities SET status = 'CLOSED' WHERE id = ?", (opp_id,))
+    conn.commit()
+    conn.close()
+    flash("Opportunity closed. Seekers will no longer see it.", "info")
+    return redirect(url_for("admin_opportunities"))
+
+
+@app.route("/admin/opportunities/<int:opp_id>/delete", methods=["POST"])
+def admin_delete(opp_id):
+    if admin_only() is None:
+        abort(403)
+    conn = db.connect()
+    conn.execute("DELETE FROM opportunities WHERE id = ?", (opp_id,))
+    conn.execute("DELETE FROM saved WHERE opportunity_id = ?", (opp_id,))
+    conn.commit()
+    conn.close()
+    flash("Opportunity removed.", "info")
+    return redirect(url_for("admin_opportunities"))
+
+
+@app.route("/admin/users", methods=["GET", "POST"])
+def admin_users():
+    if admin_only() is None:
+        abort(403)
+    errors = {}
+    conn = db.connect()
+    if request.method == "POST":  # create another admin account
+        name = request.form["name"].strip()
+        email = request.form["email"].strip().lower()
+        if name == "":
+            errors["name"] = "Please enter a name."
+        if "@" not in email:
+            errors["email"] = "Please enter a valid email."
+        if len(request.form["password"]) < 8:
+            errors["password"] = "At least 8 characters."
+        if not errors:
+            try:
+                conn.execute("INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'ADMIN')",
+                             (name, email, generate_password_hash(request.form["password"])))
+                conn.commit()
+                flash("Admin account created.", "success")
+            except sqlite3.IntegrityError:
+                errors["email"] = "That email is already used."
+    people = conn.execute("SELECT id, name, email, role FROM users ORDER BY role, name").fetchall()
+    conn.close()
+    return render_template("admin_users.html", people=people, errors=errors, form=request.form)
+
+
+@app.route("/admin/users/<int:person_id>/delete", methods=["POST"])
+def admin_remove_user(person_id):
+    admin = admin_only()
+    if admin is None:
+        abort(403)
+    if person_id == admin["id"]:
+        flash("You cannot remove your own account.", "error")
+    else:
+        conn = db.connect()
+        conn.execute("DELETE FROM profiles WHERE user_id = ?", (person_id,))
+        conn.execute("DELETE FROM saved WHERE user_id = ?", (person_id,))
+        conn.execute("DELETE FROM users WHERE id = ?", (person_id,))
+        conn.commit()
+        conn.close()
+        flash("Account removed.", "info")
+    return redirect(url_for("admin_users"))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
