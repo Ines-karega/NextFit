@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NextFit{% endblock %} - NextFit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <a class="logo" href="{{ url_for('home') }}">NextFit</a>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      {% if user and user['role'] == 'SEEKER' %}
+        <a href="{{ url_for('dashboard') }}">My matches</a>
+        <a href="{{ url_for('browse') }}">Browse all</a>
+        <a href="{{ url_for('saved_page') }}">Saved</a>
+        <a href="{{ url_for('profile') }}">Profile</a>
+      {% elif user and user['role'] == 'ADMIN' %}
+        <a href="{{ url_for('admin_opportunities') }}">Opportunities</a>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+      {% endif %}
+      <a href="{{ url_for('help_page') }}">Help</a>
+      {% if user %}
+        <form method="post" action="{{ url_for('logout') }}" class="inline"><button class="link">Log out</button></form>
+      {% else %}
+        <a href="{{ url_for('login') }}">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <p class="flash {{ category }}">{{ message }}</p>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>NextFit - helping Rwandan youth find opportunities they qualify for.</footer>
+  <script type="application/json" id="locations">{{ LOCATIONS | tojson }}</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
