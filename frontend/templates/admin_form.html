@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<form method="post">
+  <label for="title">Title</label>
+  <input id="title" name="title" value="{{ o['title'] or '' }}">
+  {% if errors.title %}<p class="error">{{ errors.title }}</p>{% endif %}
+
+  <label for="description">Description</label>
+  <textarea id="description" name="description" rows="3">{{ o['description'] or '' }}</textarea>
+  {% if errors.description %}<p class="error">{{ errors.description }}</p>{% endif %}
+
+  <label for="type">Type</label>
+  <select id="type" name="type"><option value="">Choose type</option>
+    {% for value, label in OPP_TYPES %}<option value="{{ value }}" {{ 'selected' if o['type'] == value }}>{{ label }}</option>{% endfor %}
+  </select>
+  {% if errors.type %}<p class="error">{{ errors.type }}</p>{% endif %}
+
+  <label for="province">Province</label>
+  <select id="province" name="province" class="province"><option value="">Choose province</option>
+    {% for p in LOCATIONS %}<option {{ 'selected' if o['province'] == p }}>{{ p }}</option>{% endfor %}
+  </select>
+  <label for="district">District</label>
+  <select id="district" name="district" class="district" data-selected="{{ o['district'] or '' }}"></select>
+  {% if errors.district %}<p class="error">{{ errors.district }}</p>{% endif %}
+
+  <label for="work_mode">Work mode</label>
+  <select id="work_mode" name="work_mode"><option value="">Choose work mode</option>
+    {% for value, label in WORK_MODES %}<option value="{{ value }}" {{ 'selected' if o['work_mode'] == value }}>{{ label }}</option>{% endfor %}
+  </select>
+  {% if errors.work_mode %}<p class="error">{{ errors.work_mode }}</p>{% endif %}
+
+  <label for="deadline">Deadline</label>
+  <input id="deadline" name="deadline" type="date" value="{{ o['deadline'] or '' }}">
+  {% if errors.deadline %}<p class="error">{{ errors.deadline }}</p>{% endif %}
+
+  <label for="apply_link">Application link or contact</label>
+  <input id="apply_link" name="apply_link" value="{{ o['apply_link'] or '' }}">
+  {% if errors.apply_link %}<p class="error">{{ errors.apply_link }}</p>{% endif %}
+
+  <h2>Who is it for? (eligibility rules)</h2>
+  <label for="min_age">Minimum age</label>
+  <input id="min_age" name="min_age" type="number" value="{{ o['min_age'] }}">
+  <label for="max_age">Maximum age</label>
+  <input id="max_age" name="max_age" type="number" value="{{ o['max_age'] }}">
+  {% if errors.age %}<p class="error">{{ errors.age }}</p>{% endif %}
+
+  <label>Education levels accepted</label>
+  {% for value, label in EDUCATION_LEVELS %}
+    <label class="check"><input type="checkbox" name="education" value="{{ value }}" {{ 'checked' if value in chosen }}> {{ label }}</label>
+  {% endfor %}
+  {% if errors.education %}<p class="error">{{ errors.education }}</p>{% endif %}
+
+  <label for="required_skills">Required skills (commas; leave empty if none)</label>
+  <input id="required_skills" name="required_skills" value="{{ o['required_skills'] or '' }}">
+
+  <p><button>Save</button> <a href="{{ url_for('admin_opportunities') }}">Cancel</a></p>
+</form>
+{% endblock %}

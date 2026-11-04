@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Manage opportunities{% endblock %}
+{% block content %}
+<h1>Opportunities</h1>
+<p><a class="button" href="{{ url_for('admin_add') }}">Add opportunity</a></p>
+<div class="table-wrap">
+<table>
+  <tr><th>Title</th><th>Type</th><th>Where</th><th>Deadline</th><th>Status</th><th>Actions</th></tr>
+  {% for o in opps %}
+  <tr>
+    <td>{{ o['title'] }}</td>
+    <td>{{ TYPE_LABEL[o['type']] }}</td>
+    <td>{{ o['district'] }}</td>
+    <td>{{ o['deadline'] }}</td>
+    <td>{{ o['status'] }}</td>
+    <td>
+      <a href="{{ url_for('admin_edit', opp_id=o['id']) }}">Edit</a>
+      {% if o['status'] == 'OPEN' %}
+      <form class="inline" method="post" action="{{ url_for('admin_close', opp_id=o['id']) }}"><button class="grey">Close</button></form>
+      {% endif %}
+      <form class="inline" method="post" action="{{ url_for('admin_delete', opp_id=o['id']) }}" onsubmit="return confirm('Remove this opportunity?')"><button class="red">Remove</button></form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}
