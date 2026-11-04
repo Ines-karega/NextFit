@@ -91,3 +91,29 @@ NextFit sends the email through any free SMTP service. The easiest is a Gmail ac
   instead ("demo mode") so you can still try it.
 - Before going live, set a private `SECRET_KEY`, and `ADMIN_EMAIL` / `ADMIN_PASSWORD` for the first admin.
   Set `NEXTFIT_SEED=0` to skip the sample data.
+
+## Files
+
+**`backend/`** (Python, runs on the server)
+
+| File | What it does |
+|------|--------------|
+| `app.py` | All the pages (routes): sign up, log in, profile, dashboard, saved, admin |
+| `matching.py` | The matching rules and the "why you matched" explanation |
+| `db.py` | Creates the SQLite tables and the first admin |
+| `emailer.py` | Sends the password reset email |
+| `seed.py` | The sample opportunities and demo seeker |
+| `rwanda.py` | Provinces, districts and fixed lists (education levels, types) |
+
+**`frontend/`** (what the user sees in the browser)
+
+| Folder | What it has |
+|--------|-------------|
+| `templates/` | The HTML pages |
+| `static/` | `style.css` (the look) and `app.js` (fills the district list) |
+
+Other files in the main folder: `requirements.txt` (libraries to install), `nextfit.db` (created automatically).
+
+## Not in this prototype (planned for later, as in the SRS)
+
+Mobile app, SMS reminders, automatic collection of opportunities from other sites.
