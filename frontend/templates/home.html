@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Find the opportunities you already qualify for</h1>
+  <p>NextFit matches your age, education and skills with trainings, internships and jobs in Rwanda. The closest deadlines come first, and we show you why each one matched.</p>
+  <p><a class="button" href="{{ url_for('signup') }}">Create my profile</a>
+     <a class="button grey" href="{{ url_for('login') }}">I have an account</a></p>
+</div>
+<h2>How it works</h2>
+<ol>
+  <li>Sign up and tell us your age, district, education and skills.</li>
+  <li>See a short list made just for you, nearest deadlines first.</li>
+  <li>Save what you like and get a reminder when a deadline is 14 days away.</li>
+</ol>
+{% endblock %}
