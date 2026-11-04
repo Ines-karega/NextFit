@@ -109,5 +109,103 @@ def help_page():
     return render_template("help.html")
 
 
+# ---------------- FR1: sign up, log in, reset password ----------------
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    errors = {}
+    if request.method == "POST":
+        name = request.form["name"].strip()
+        email = request.form["email"].strip().lower()
+        password = request.form["password"]
+        if name == "":
+            errors["name"] = "Please enter your name."
+        if "@" not in email:
+            errors["email"] = "Please enter a valid email address."
+        if len(password) < 8:
+            errors["password"] = "Your password needs at least 8 characters."
+        if not errors:
+            conn = db.connect()
+            try:
+                cursor = conn.execute(
+                    "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'SEEKER')",
+                    (name, email, generate_password_hash(password)))
+                conn.commit()
+                session["user_id"] = cursor.lastrowid
+                return redirect(url_for("profile"))
+            except sqlite3.IntegrityError:
+                errors["email"] = "This email already has an account. Try logging in."
+            finally:
+                conn.close()
+    return render_template("signup.html", errors=errors, form=request.form)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        conn = db.connect()
+        found = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        conn.close()
+        if found and check_password_hash(found["password_hash"], request.form["password"]):
+            session["user_id"] = found["id"]
+            return redirect(url_for("home"))
+        flash("That email or password is not correct.", "error")
+    return render_template("login.html", form=request.form)
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+
+@app.route("/forgot", methods=["GET", "POST"])
+def forgot():
+    link = None
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+        conn = db.connect()
+        found = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
+        if found:
+            token = secrets.token_urlsafe(24)
+            expires = (datetime.now() + timedelta(hours=1)).isoformat()
+            conn.execute("INSERT INTO reset_tokens (token, user_id, expires) VALUES (?, ?, ?)",
+                         (token, found["id"], expires))
+            conn.commit()
+            reset_link = url_for("reset", token=token, _external=True)
+            sent = emailer.send_reset_email(email, reset_link)
+            if not sent and not emailer.email_is_set_up():
+                link = reset_link  # demo mode: no email service set up, so show the link here
+        conn.close()
+        if emailer.email_is_set_up():
+            flash("If that email has an account, we have sent a reset link to it. Please check your inbox.", "info")
+        else:
+            flash("If that email has an account, a reset link is ready below.", "info")
+    return render_template("forgot.html", link=link)
+
+
+@app.route("/reset/<token>", methods=["GET", "POST"])
+def reset(token):
+    conn = db.connect()
+    row = conn.execute("SELECT * FROM reset_tokens WHERE token = ?", (token,)).fetchone()
+    if row is None or datetime.fromisoformat(row["expires"]) < datetime.now():
+        conn.close()
+        flash("This reset link is not valid or has expired. Please ask for a new one.", "error")
+        return redirect(url_for("forgot"))
+    if request.method == "POST":
+        if len(request.form["password"]) < 8:
+            flash("Your password needs at least 8 characters.", "error")
+        else:
+            conn.execute("UPDATE users SET password_hash = ? WHERE id = ?",
+                         (generate_password_hash(request.form["password"]), row["user_id"]))
+            conn.execute("DELETE FROM reset_tokens WHERE token = ?", (token,))
+            conn.commit()
+            conn.close()
+            flash("Password changed. Please log in.", "success")
+            return redirect(url_for("login"))
+    conn.close()
+    return render_template("reset.html")
+
+
 if __name__ == "__main__":
     app.run(debug=True)
