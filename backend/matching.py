@@ -8,6 +8,7 @@ District is NOT a rule. It only changes the order of the list.
 """
 from datetime import date
 
+import db
 from rwanda import EDU_LABEL
 
 
@@ -19,6 +20,23 @@ def split_skills(text):
         if piece and piece not in skills:
             skills.append(piece)
     return skills
+
+
+def skills_in_demand(profile, opportunities, how_many=5):
+    """The skills asked for most often in open opportunities.
+    Returns a list of (skill, number_of_opportunities, you_have_it)."""
+    my_skills = [s.lower() for s in split_skills(profile["skills"])]
+    counts = {}
+    names = {}
+    for opp in opportunities:
+        if not is_open(opp):
+            continue
+        for skill in split_skills(opp["required_skills"]):
+            key = skill.lower()
+            counts[key] = counts.get(key, 0) + 1
+            names[key] = skill
+    top = sorted(counts, key=lambda k: -counts[k])[:how_many]
+    return [(names[k], counts[k], k in my_skills) for k in top]
 
 
 def days_until(deadline_text):
@@ -37,7 +55,7 @@ def check(profile, opp):
     age_ok = opp["min_age"] <= profile["age"] <= opp["max_age"]
 
     # Rule 2: education
-    accepted = opp["education"].split(",")
+    accepted = [level.strip() for level in opp["education"].split(",") if level.strip()]
     edu_ok = profile["education"] in accepted
 
     # Rule 3: skills (compare in lowercase so 'Excel' equals 'excel')
@@ -58,7 +76,7 @@ def check(profile, opp):
     # FR4.3: the "why" explanation, as (passed?, sentence) pairs
     reasons = []
     reasons.append((age_ok, f"Age: you are {profile['age']}; this is for ages {opp['min_age']} to {opp['max_age']}."))
-    accepted_names = ", ".join(EDU_LABEL[e] for e in accepted)
+    accepted_names = ", ".join(EDU_LABEL.get(e, e) for e in accepted)
     if edu_ok:
         reasons.append((True, f"Education: {EDU_LABEL[profile['education']]} is accepted."))
     else:
@@ -85,7 +103,15 @@ def sort_key(result):
     return (not result["in_district"], result["opp"]["deadline"])
 
 
-def get_matches(profile, opportunities):
+def get_matches(seeker_id):
+    """The seeker's matched list (SRS B.4 steps 4 to 15): load their profile and the
+    open opportunities through the data access layer, then check and sort them."""
+    profile = db.get_profile(seeker_id)
+    opportunities = db.get_open_opportunities(date.today().isoformat())
+    return match_all(profile, opportunities)
+
+
+def match_all(profile, opportunities):
     """Return only the open opportunities this seeker qualifies for, sorted."""
     matches = []
     for opp in opportunities:

@@ -1,6 +1,8 @@
 """Demo data so the prototype works on first run (hypothesis needs 20+ opportunities).
 These are SAMPLE listings for demonstration only; an admin replaces them with real ones.
 Deadlines are relative to today so the demo never goes stale."""
+import csv
+import os
 from datetime import date, timedelta
 
 from werkzeug.security import generate_password_hash
@@ -37,23 +39,62 @@ OPPS = [
 ]
 
 
-def add_demo_data(conn):
-    if conn.execute("SELECT COUNT(*) FROM opportunities").fetchone()[0] == 0:
-        today = date.today()
-        for (title, typ, skills, prov, dist, mode, days, lo, hi, edu, desc) in OPPS:
-            conn.execute(
-                "INSERT INTO opportunities (title,description,type,required_skills,province,"
-                "district,work_mode,deadline,apply_link,min_age,max_age,education) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                (title, desc, typ, skills, prov, dist, mode,
-                 (today + timedelta(days=days)).isoformat(),
-                 "https://example.org/apply", lo, hi, edu))
-    if not conn.execute("SELECT 1 FROM users WHERE email='seeker@nextfit.rw'").fetchone():
-        cur = conn.execute(
-            "INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,'SEEKER')",
-            ("Demo Seeker", "seeker@nextfit.rw", generate_password_hash("Seeker123!")))
+def add_real_opportunities(conn):
+    """Load the real listings from real_opportunities.csv (filled in by the admin).
+    Columns: title,type,province,district,work_mode,deadline(YYYY-MM-DD),apply_link,
+    min_age,max_age,education(e.g. TVET,BACHELORS in quotes),required_skills,description,source
+    Returns how many rows were added."""
+    path = os.path.join(os.path.dirname(__file__), "real_opportunities.csv")
+    if not os.path.exists(path):
+        return 0
+    added = 0
+    with open(path, newline="", encoding="utf-8-sig") as f:  # utf-8-sig: Excel adds a hidden mark
+        for row in csv.DictReader(f):
+            if not (row.get("title") or "").strip():
+                continue
+            try:
+                date.fromisoformat(row["deadline"].strip())
+                conn.execute(
+                    "INSERT INTO opportunities (title,description,type,required_skills,province,"
+                    "district,work_mode,deadline,apply_link,min_age,max_age,education) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (row["title"].strip(), row["description"].strip(), row["type"].strip().upper(),
+                     row["required_skills"].strip(), row["province"].strip(), row["district"].strip(),
+                     row["work_mode"].strip().upper(), row["deadline"].strip(),
+                     row["apply_link"].strip(), int(row["min_age"]), int(row["max_age"]),
+                     row["education"].strip().upper()))
+                added += 1
+            except (ValueError, KeyError, AttributeError):
+                print("Skipped a bad row in real_opportunities.csv:", row.get("title"))
+    return added
+
+
+def add_starting_data(conn, with_samples=True):
+    """Fill an empty database. Real listings win: when the CSV has rows, the sample
+    listings are not added. On the live site (with_samples=False) only the real
+    listings are loaded: no sample listings and no demo account with a known password."""
+    if conn.execute("SELECT COUNT(*) AS n FROM opportunities").fetchone()["n"] == 0:
+        if add_real_opportunities(conn) == 0 and with_samples:
+            today = date.today()
+            for (title, typ, skills, prov, dist, mode, days, lo, hi, edu, desc) in OPPS:
+                conn.execute(
+                    "INSERT INTO opportunities (title,description,type,required_skills,province,"
+                    "district,work_mode,deadline,apply_link,min_age,max_age,education) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (title, desc, typ, skills, prov, dist, mode,
+                     (today + timedelta(days=days)).isoformat(),
+                     "https://example.org/apply", lo, hi, edu))
+    if with_samples:
+        _add_demo_seeker(conn)
+
+
+def _add_demo_seeker(conn):
+    if not conn.execute("SELECT id FROM users WHERE email='seeker@nextfit.rw'").fetchone():
+        new_user = conn.execute(
+            "INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,'SEEKER') RETURNING id",
+            ("Demo Seeker", "seeker@nextfit.rw", generate_password_hash("Seeker123!"))).fetchone()
         conn.execute(
             "INSERT INTO profiles (user_id,age,province,district,education,status,skills) "
             "VALUES (?,?,?,?,?,?,?)",
-            (cur.lastrowid, 22, "Kigali City", "Gasabo", "BACHELORS", "Graduate",
+            (new_user["id"], 22, "Kigali City", "Gasabo", "BACHELORS", "Graduate",
              "Communication, Excel, English, Computer"))
