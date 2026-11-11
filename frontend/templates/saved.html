@@ -5,8 +5,8 @@
 <h1>My saved opportunities</h1>
 {% for r in reminders %}
   <div class="reminder">
-    <strong>Deadline reminder:</strong> {{ r['opp']['title'] }} closes in
-    <span class="urgent">{{ r['days_left'] }} day(s)</span>.
+    <strong>Deadline reminder:</strong> {{ r['opp']['title'] }} -
+    <span class="urgent">{{ r['days_left'] | days_text }}</span> (deadline {{ r['opp']['deadline'] }}).
   </div>
 {% endfor %}
 {% for m in items %}

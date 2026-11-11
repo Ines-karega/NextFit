@@ -19,9 +19,9 @@
   <p>{{ o['description'] }}</p>
   <p>
     Deadline: {{ o['deadline'] }} -
-    {% if m['days_left'] < 0 %}<span class="urgent">closed</span>
-    {% elif m['days_left'] <= 7 %}<span class="urgent">{{ m['days_left'] }} day(s) left</span>
-    {% else %}{{ m['days_left'] }} days left{% endif %}
+    {% if m['days_left'] < 0 or o['status'] != 'OPEN' %}<span class="urgent">closed</span>
+    {% elif m['days_left'] <= 7 %}<span class="urgent">{{ m['days_left'] | days_text }}</span>
+    {% else %}{{ m['days_left'] | days_text }}{% endif %}
   </p>
 
   <strong>Why this {% if show_status and not m['eligible'] %}does not fully match{% else %}matched you{% endif %}:</strong>
@@ -31,8 +31,17 @@
     {% endfor %}
   </ul>
 
+  {# FR3.1: the admin gives an application link or a contact (an email address or a phone number) #}
+  {% set apply = o['apply_link'] %}
+  {% if not apply.startswith('http') %}
+    <p>How to apply: {% if '@' in apply %}send your application by email to {% endif %}<strong>{{ apply }}</strong></p>
+  {% endif %}
   <p>
-    <a class="button" href="{{ o['apply_link'] }}" target="_blank" rel="noopener">Apply</a>
+    {% if apply.startswith('http://') or apply.startswith('https://') %}
+      <a class="button" href="{{ apply }}" target="_blank" rel="noopener">Apply</a>
+    {% elif '@' in apply %}
+      <a class="button" href="mailto:{{ apply }}">Apply by email</a>
+    {% endif %}
     {% if o['id'] in saved %}
       <form class="inline" method="post" action="{{ url_for('unsave', opp_id=o['id']) }}">
         <input type="hidden" name="next" value="{{ next_url }}"><button class="grey">Remove from saved</button>
