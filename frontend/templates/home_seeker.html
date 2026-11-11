@@ -15,11 +15,39 @@
   {% endif %}
 </div>
 
+{% if top_pick %}
+  <h2>Your top pick today</h2>
+  <div class="card {{ top_pick['opp']['type'] | lower }}">
+    <h3>{{ top_pick['opp']['title'] }}</h3>
+    <span class="badge">{{ TYPE_LABEL[top_pick['opp']['type']] }}</span>
+    <span class="badge">Location: {{ top_pick['opp']['district'] }}, {{ top_pick['opp']['province'] }}</span>
+    {% if top_pick['in_district'] %}<span class="badge full">In your district ({{ top_pick['opp']['district'] }})</span>{% endif %}
+    {% if top_pick['skill_match'] == 'FULL' %}<span class="badge full">Full skill match</span>{% endif %}
+    <p>{{ top_pick['opp']['description'] }}</p>
+    <p>Deadline: {{ top_pick['opp']['deadline'] }} - <span class="urgent">{{ top_pick['days_left'] | days_text }}</span>.
+       We picked it because it is closest to you and closes soonest.</p>
+    <a class="button" href="{{ url_for('dashboard') }}">See why it matches</a>
+    <p class="safety">Stay safe: NextFit cannot check that listings are genuine. Verify every opportunity yourself, and never pay a fee or share sensitive personal information before you do.</p>
+  </div>
+{% endif %}
+
+{% if demand %}
+  <h2>Skills employers ask for most</h2>
+  <p>Based on the open opportunities right now. A tick means you already have the skill.</p>
+  <div class="card">
+    <ul class="reasons">
+      {% for skill, number, have_it in demand %}
+        <li class="{{ 'yes' if have_it else 'no' }}"><strong>{{ skill }}</strong> - asked for in {{ number }} opportunit{{ 'y' if number == 1 else 'ies' }}{% if not have_it %}. Learn it to unlock more matches.{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 {% if reminders %}
   <h2>Closing soon</h2>
   {% for r in reminders %}
-    <div class="reminder"><strong>{{ r['opp']['title'] }}</strong> closes in
-      <span class="urgent">{{ r['days_left'] }} day(s)</span> ({{ r['opp']['deadline'] }}).</div>
+    <div class="reminder"><strong>{{ r['opp']['title'] }}</strong> -
+      <span class="urgent">{{ r['days_left'] | days_text }}</span> (deadline {{ r['opp']['deadline'] }}).</div>
   {% endfor %}
 {% endif %}
 
