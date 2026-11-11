@@ -141,6 +141,13 @@ def help_page():
     return render_template("help.html")
 
 
+@app.route("/health")
+def health():
+    """A tiny page for the uptime monitor to visit every 5 minutes, so the free
+    hosting plan does not put the site to sleep. It does not use the database."""
+    return "ok"
+
+
 # ---------------- FR1: sign up, log in, reset password ----------------
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
