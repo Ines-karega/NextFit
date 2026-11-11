@@ -281,6 +281,33 @@ def dashboard():
                            args=request.args)
 
 
+@app.route("/api/dashboard")
+def api_dashboard():
+    """The same dashboard information as JSON (SRS 3.4 and B.4 steps 20 to 23):
+    the matched list with reasons, the reminders, or a no-match message."""
+    user = seeker_only()
+    if user is None:
+        return jsonify(error="Please log in as a seeker first."), 401
+    if db.get_profile(user["id"]) is None:
+        return jsonify(error="Please fill in your profile first."), 400
+    matches = []
+    for m in matching.get_matches(user["id"]):
+        opp = m["opp"]
+        matches.append({
+            "id": opp["id"], "title": opp["title"], "type": opp["type"],
+            "province": opp["province"], "district": opp["district"], "work_mode": opp["work_mode"],
+            "deadline": opp["deadline"], "days_left": m["days_left"], "apply_link": opp["apply_link"],
+            "in_seeker_district": m["in_district"], "skill_match": m["skill_match"],
+            "reasons": [{"met": passed, "text": sentence} for passed, sentence in m["reasons"]],
+        })
+    reminders = [{"id": r["opp"]["id"], "title": r["opp"]["title"], "deadline": r["opp"]["deadline"],
+                  "days_left": r["days_left"]} for r in get_reminders(user["id"])]
+    message = None
+    if len(matches) == 0:
+        message = "No matches yet. You can browse all open opportunities at " + url_for("browse")
+    return jsonify(matches=matches, reminders=reminders, message=message)
+
+
 # ---------------- FR9: browse everything ----------------
 @app.route("/browse")
 def browse():
