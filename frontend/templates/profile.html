@@ -3,6 +3,7 @@
 {% block content %}
 <h1>My profile</h1>
 <p>Update this any time your situation changes. Your matches update straight away.</p>
+<p><small>Why we ask: your age, education and skills decide which opportunities you qualify for, and your district puts the ones near you first. We do not use these details for anything else (Law No. 058/2021).</small></p>
 <form method="post">
   <label for="age">Age</label>
   <input id="age" name="age" type="number" value="{{ form['age'] if form['age'] is defined else '' }}">
