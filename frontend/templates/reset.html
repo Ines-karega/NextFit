@@ -5,6 +5,7 @@
 <form method="post">
   <label for="password">New password (at least 8 characters)</label>
   <input id="password" name="password" type="password">
+  {% if errors.password %}<p class="error">{{ errors.password }}</p>{% endif %}
   <p><button>Save password</button></p>
 </form>
 {% endblock %}
