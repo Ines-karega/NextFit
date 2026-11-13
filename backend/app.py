@@ -143,8 +143,8 @@ def help_page():
 
 @app.route("/health")
 def health():
-    """A tiny page for the uptime monitor to visit every 5 minutes, so the free
-    hosting plan does not put the site to sleep. It does not use the database."""
+    """A tiny page that answers "ok" when the site is running. It does not use the
+    database, so it is a quick way to check that the live site is up."""
     return "ok"
 
 
