@@ -27,7 +27,7 @@ tick **"Add python.exe to PATH"**.
 
 1. Download the code and open a terminal in the project folder:
    ```
-   git clone https://github.com/YOUR-USERNAME/NextFit.git
+   git clone https://github.com/Ines-karega/NextFit.git
    cd NextFit
    ```
 2. Create a virtual environment (a private box for this project's libraries):
@@ -49,6 +49,7 @@ tick **"Add python.exe to PATH"**.
    python backend/app.py
    ```
 6. Open http://127.0.0.1:5000 in your browser.
+7. To stop the website, go back to the terminal and press **Ctrl + C**.
 
 The database file `nextfit.db` is created automatically the first time. It is filled with the real listings in
 `backend/real_opportunities.csv` when that file has rows, and with 22 sample opportunities when it does not.
@@ -145,7 +146,7 @@ Brevo sends over normal HTTPS, so it also works on hosts that block the usual em
 - The 22 sample opportunities are **sample data** (links go to example.org). Their deadlines are set relative to today so the
   demo always has open opportunities. One has an expired deadline on purpose, to show that expired ones stay hidden.
 - **Forgot password:** the reset link is **emailed** to the user and works for 1 hour. This needs the email settings
-  below. If they are not set (for example when you just run it on your computer), the link is shown on the screen
+  described above. If they are not set (for example when you just run it on your computer), the link is shown on the screen
   instead ("demo mode") so you can still try it.
 - Before going live, set a private `SECRET_KEY`, and `ADMIN_EMAIL` / `ADMIN_PASSWORD` for the first admin.
   Set `NEXTFIT_SEED=0` to skip the sample data.
