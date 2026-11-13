@@ -20,6 +20,11 @@ DB_FILE = os.environ.get("NEXTFIT_DB", os.path.join(PROJECT_FOLDER, "nextfit.db"
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 ON_LIVE_SITE = DATABASE_URL != ""
 
+# Vercel (the hosting company) cannot keep a SQLite file, so stop with a clear message
+# instead of failing later in a confusing way. Vercel sets VERCEL=1 by itself.
+if os.environ.get("VERCEL") and not ON_LIVE_SITE:
+    raise RuntimeError("Set DATABASE_URL (the PostgreSQL address from Neon) in the Vercel project settings.")
+
 if ON_LIVE_SITE:
     import psycopg
     from psycopg.rows import dict_row
