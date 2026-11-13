@@ -66,28 +66,35 @@ created by the program on first start, and only an admin can create more.
 
 These two demo accounts and the sample listings only exist on your own computer. The live site never creates them.
 
-## Put it online (free): Render + Neon + Brevo
+## Put it online (free): Vercel + Neon + Brevo
 
-Free hosting deletes local files whenever the site restarts, so a SQLite file would lose its data there.
+Free hosting does not keep local files, so a SQLite file would lose its data there.
 On the live site NextFit therefore keeps its data in a free PostgreSQL database. Nothing in the code needs
 changing: when the `DATABASE_URL` setting exists, PostgreSQL is used; when it does not, SQLite is used.
 
 1. **Database (Neon).** Create a free account at neon.com and a project in the **Frankfurt** region.
    Copy the **pooled connection string** (it starts with `postgresql://`).
 2. **Email (Brevo).** Follow "On the live site: Brevo" in the next section to get an API key.
-3. **Website (Render).** Put the code on GitHub, then in Render choose **New > Blueprint** and pick the
-   repository. Render reads `render.yaml` and asks for these values:
+3. **Website (Vercel).** Put the code on GitHub. Create a free account at vercel.com, choose
+   **Add New > Project** and import the repository. Vercel finds the Flask app through `wsgi.py`.
+   Before pressing **Deploy**, open **Environment Variables** and add:
 
    | Name | Value |
    |------|-------|
    | `DATABASE_URL` | the connection string from Neon |
+   | `SECRET_KEY` | a long random text that keeps logins safe. Make one with `python -c "import secrets; print(secrets.token_hex(32))"` |
    | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | the first admin account. Choose a strong password. |
    | `BREVO_API_KEY` / `EMAIL_FROM` | from step 2, e.g. `noreply@karega.tech` |
 
-   The site refuses to start without `ADMIN_PASSWORD`, so there is never a live admin with a known password.
-4. **Your own address.** In Render open the site's **Settings > Custom Domains**, add `nextfit.karega.tech`,
-   and create the CNAME record it shows in your domain's DNS settings. Render adds HTTPS by itself.
-5. **Keep it awake.** Follow "Keep the live site awake" below.
+   The site refuses to start without `DATABASE_URL`, `SECRET_KEY` and `ADMIN_PASSWORD`, so there is never a
+   live admin with a known password. If a deploy fails, the reason is in the project's **Logs** tab.
+4. **Keep the website next to the database.** In the Vercel project open **Settings > Functions** and set the
+   **Function Region** to **Frankfurt (fra1)**, then deploy again. With both in Frankfurt, pages load faster.
+5. **Your own address.** In the Vercel project open **Settings > Domains**, add `nextfit.karega.tech`,
+   and create the CNAME record it shows in your domain's DNS settings. Vercel adds HTTPS by itself.
+
+Vercel starts the site whenever someone visits, so it never needs to be kept awake.
+Open `https://nextfit.karega.tech/health` at any time: it answers `ok` when the site is running.
 
 On first start the live site creates the tables, the first admin, and loads the real listings from
 `backend/real_opportunities.csv`. After that, the admin adds and edits opportunities on the website.
@@ -98,7 +105,7 @@ NextFit can send the email in two ways. If both are set up, Brevo is used.
 
 ### On the live site: Brevo (free, 300 emails a day, reaches any email address)
 
-Brevo sends over normal HTTPS, so it works on hosts that block the usual email ports (such as Render's free plan).
+Brevo sends over normal HTTPS, so it also works on hosts that block the usual email ports.
 
 1. Create a free account at brevo.com.
 2. In Brevo, add and verify your domain (**Senders, Domains & Dedicated IPs > Domains**) by copying the DNS records
@@ -133,18 +140,6 @@ Brevo sends over normal HTTPS, so it works on hosts that block the usual email p
    Mac / Linux: use `export SMTP_HOST=smtp.gmail.com` and so on.
 3. Open **Log in > Forgot your password?**, type an account's email, and check that inbox.
 
-## Keep the live site awake (free hosting plans)
-
-Render's free plan pauses the site after 15 minutes without visitors, and waking it takes about a minute.
-A free monitor that visits the site every 5 minutes stops that from happening:
-
-1. Create a free account at uptimerobot.com.
-2. Click **New monitor**, choose **HTTP(s)**, and enter the site address followed by `/health`
-   (for example `https://nextfit.karega.tech/health`).
-3. Set the interval to **5 minutes** and save.
-
-UptimeRobot also emails you if the site ever goes down.
-
 ## Important notes
 
 - The 22 sample opportunities are **sample data** (links go to example.org). Their deadlines are set relative to today so the
@@ -175,8 +170,8 @@ UptimeRobot also emails you if the site ever goes down.
 | `templates/` | The HTML pages |
 | `static/` | `style.css` (the look) and `app.js` (fills the district list) |
 
-Other files in the main folder: `requirements.txt` (libraries to install), `render.yaml` (settings for the live
-site), `nextfit.db` (created automatically on your computer).
+Other files in the main folder: `requirements.txt` (libraries to install), `wsgi.py` (the starting point Vercel uses
+for the live site), `nextfit.db` (created automatically on your computer).
 
 ## Not in this prototype (planned for later, as in the SRS)
 
