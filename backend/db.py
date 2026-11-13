@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS opportunities (
     province TEXT, district TEXT, work_mode TEXT, deadline TEXT,
     apply_link TEXT, min_age INTEGER, max_age INTEGER,
     education TEXT,               -- accepted levels, e.g. 'TVET,BACHELORS'
-    status TEXT DEFAULT 'OPEN'    -- 'OPEN' or 'CLOSED'
+    status TEXT DEFAULT 'OPEN',   -- 'OPEN' or 'CLOSED'
+    added_by INTEGER              -- the id of the admin who added it
 );
 CREATE TABLE IF NOT EXISTS saved (
     user_id INTEGER, opportunity_id INTEGER,
@@ -96,6 +97,15 @@ class Connection:
         else:
             self.raw.executescript(script)
 
+    def add_column_if_missing(self, table, column, kind):
+        """Add a column to a table made by an older version of NextFit."""
+        if ON_LIVE_SITE:
+            self.raw.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {kind}")
+        else:
+            existing = [row["name"] for row in self.raw.execute(f"PRAGMA table_info({table})")]
+            if column not in existing:
+                self.raw.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
+
     def commit(self):
         self.raw.commit()
 
@@ -127,6 +137,7 @@ def setup():
         # If two copies of the server start together, the second one waits here for the first.
         conn.execute("SELECT pg_advisory_xact_lock(20260917)")
     conn.run_script(TABLES)
+    conn.add_column_if_missing("opportunities", "added_by", "INTEGER")
 
     # The first admin is created here, once (SRS FR1.1).
     admin = conn.execute("SELECT id FROM users WHERE role = 'ADMIN'").fetchone()
@@ -142,7 +153,9 @@ def setup():
 
     if os.environ.get("NEXTFIT_SEED", "1") == "1":
         import seed
-        seed.add_starting_data(conn, with_samples=not ON_LIVE_SITE)
+        # The starting listings were prepared by the admin, so they are recorded under the first admin account.
+        first_admin = conn.execute("SELECT id FROM users WHERE role = 'ADMIN' ORDER BY id").fetchone()
+        seed.add_starting_data(conn, added_by=first_admin["id"], with_samples=not ON_LIVE_SITE)
 
     conn.commit()
     conn.close()
@@ -232,8 +245,10 @@ def get_open_opportunities(today):
 
 
 def get_all_opportunities():
-    """Every opportunity, for the admin's list."""
-    return connect().execute("SELECT * FROM opportunities ORDER BY status DESC, deadline").fetchall()
+    """Every opportunity, for the admin's list, with the name of the admin who added it."""
+    return connect().execute(
+        "SELECT o.*, u.name AS added_by_name FROM opportunities o "
+        "LEFT JOIN users u ON u.id = o.added_by ORDER BY o.status DESC, o.deadline").fetchall()
 
 
 def get_opportunity(opp_id):
@@ -244,10 +259,12 @@ def count_opportunities(status):
     return connect().execute("SELECT COUNT(*) AS n FROM opportunities WHERE status = ?", (status,)).fetchone()["n"]
 
 
-def add_opportunity(values):
-    """values: the 12 fields in the order of OPPORTUNITY_COLUMNS."""
+def add_opportunity(values, admin_id):
+    """values: the 12 fields in the order of OPPORTUNITY_COLUMNS.
+    admin_id: the admin who is adding it, so the admin's list can show who added what."""
     conn = connect()
-    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", values)
+    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}, added_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                 tuple(values) + (admin_id,))
     conn.commit()
 
 
