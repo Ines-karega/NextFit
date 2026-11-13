@@ -32,7 +32,7 @@
   </ul>
 
   {# FR3.1: the admin gives an application link or a contact (an email address or a phone number) #}
-  {% set apply = o['apply_link'] %}
+  {% set apply = o['apply_link'] | replace('mailto:', '') %}
   {% if not apply.startswith('http') %}
     <p>How to apply: {% if '@' in apply %}send your application by email to {% endif %}<strong>{{ apply }}</strong></p>
   {% endif %}
