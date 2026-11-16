@@ -114,8 +114,8 @@ def home():
     if user is None:
         return render_template("home.html")
     if user["role"] == "ADMIN":
-        counts = {"open": db.count_opportunities("OPEN"), "closed": db.count_opportunities("CLOSED"),
-                  "seekers": db.count_seekers()}
+        counts = db.count_opportunities(date.today().isoformat())   # open, expired, closed
+        counts["seekers"] = db.count_seekers()
         return render_template("home_admin.html", counts=counts)
 
     # Seeker home: a short summary of what is waiting for them
@@ -413,7 +413,8 @@ def opportunity_values(form):
 def admin_opportunities():
     if admin_only() is None:
         abort(403)
-    return render_template("admin_opps.html", opps=db.get_all_opportunities())
+    # today is passed in so the page can mark listings whose deadline has passed
+    return render_template("admin_opps.html", opps=db.get_all_opportunities(), today=date.today().isoformat())
 
 
 @app.route("/admin/opportunities/new", methods=["GET", "POST"])

@@ -10,6 +10,14 @@
   </div>
 </div>
 
+{% if counts['expired'] %}
+  <div class="reminder">
+    <strong>{{ counts['expired'] }} opportunit{{ 'y has' if counts['expired'] == 1 else 'ies have' }} passed the deadline.</strong>
+    Seekers no longer see {{ 'it' if counts['expired'] == 1 else 'them' }}.
+    <a href="{{ url_for('admin_opportunities') }}">Close or remove {{ 'it' if counts['expired'] == 1 else 'them' }}</a>.
+  </div>
+{% endif %}
+
 <h2>At a glance</h2>
 <div class="steps">
   <div class="step"><div class="icon">&#9989;</div><h3>{{ counts['open'] }} open</h3><p>Opportunities seekers can see.</p></div>

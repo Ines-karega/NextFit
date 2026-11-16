@@ -257,8 +257,19 @@ def get_opportunity(opp_id):
     return connect().execute("SELECT * FROM opportunities WHERE id = ?", (opp_id,)).fetchone()
 
 
-def count_opportunities(status):
-    return connect().execute("SELECT COUNT(*) AS n FROM opportunities WHERE status = ?", (status,)).fetchone()["n"]
+def count_opportunities(today):
+    """For the admin's home page. Returns three numbers:
+    open = seekers can see them, expired = the deadline has passed but the admin
+    has not closed them yet, closed = the admin closed them."""
+    counts = {"open": 0, "expired": 0, "closed": 0}
+    for row in connect().execute("SELECT status, deadline FROM opportunities").fetchall():
+        if row["status"] == "CLOSED":
+            counts["closed"] += 1
+        elif row["deadline"] < today:
+            counts["expired"] += 1
+        else:
+            counts["open"] += 1
+    return counts
 
 
 def add_opportunity(values, admin_id):

@@ -12,7 +12,7 @@
     <td>{{ TYPE_LABEL[o['type']] }}</td>
     <td>{{ o['district'] }}</td>
     <td>{{ o['deadline'] }}</td>
-    <td>{{ o['status'] }}</td>
+    <td>{% if o['status'] == 'OPEN' and o['deadline'] < today %}<span class="urgent">Deadline passed</span>{% else %}{{ o['status'] }}{% endif %}</td>
     <td>{% if o['added_by_name'] %}{{ o['added_by_name'] }}{% elif o['added_by'] %}Removed account{% else %}Not recorded{% endif %}</td>
     <td>
       <a href="{{ url_for('admin_edit', opp_id=o['id']) }}">Edit</a>
