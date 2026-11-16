@@ -32,3 +32,21 @@ for (var i = 0; i < provinceBoxes.length; i++) {
     });
   })(provinceBoxes[i]);
 }
+
+// Adds a "Show password" tick box under every password box, so people can
+// check what they typed. Ticking it shows the letters; unticking hides them again.
+var passwordBoxes = document.querySelectorAll('input[type="password"]');
+for (var j = 0; j < passwordBoxes.length; j++) {
+  (function (passwordBox) {
+    var tick = document.createElement("input");
+    tick.type = "checkbox";
+    var label = document.createElement("label");
+    label.className = "check show-password";
+    label.appendChild(tick);
+    label.appendChild(document.createTextNode(" Show password"));
+    passwordBox.insertAdjacentElement("afterend", label);
+    tick.addEventListener("change", function () {
+      passwordBox.type = tick.checked ? "text" : "password";
+    });
+  })(passwordBoxes[j]);
+}
