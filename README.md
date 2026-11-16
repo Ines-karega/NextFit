@@ -85,6 +85,7 @@ changing: when the `DATABASE_URL` setting exists, PostgreSQL is used; when it do
    | `DATABASE_URL` | the connection string from Neon |
    | `SECRET_KEY` | a long random text that keeps logins safe. Make one with `python -c "import secrets; print(secrets.token_hex(32))"` |
    | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | the first admin account. Choose a strong password. |
+   | `ADMIN_NAME` | optional, the first admin's name, shown as "Added by" on the starting listings (default `NextFit Admin`) |
    | `BREVO_API_KEY` / `EMAIL_FROM` | from step 2, e.g. `noreply@karega.tech` |
 
    The site refuses to start without `DATABASE_URL`, `SECRET_KEY` and `ADMIN_PASSWORD`, so there is never a

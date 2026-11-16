@@ -143,13 +143,15 @@ def setup():
     admin = conn.execute("SELECT id FROM users WHERE role = 'ADMIN'").fetchone()
     if admin is None:
         email = os.environ.get("ADMIN_EMAIL", "admin@nextfit.rw")
+        # The name shown in the menu greeting and in the "Added by" column of the admin's list.
+        admin_name = os.environ.get("ADMIN_NAME", "").strip() or "NextFit Admin"
         password = os.environ.get("ADMIN_PASSWORD", "")
         if password == "":
             if ON_LIVE_SITE:
                 raise RuntimeError("Set ADMIN_EMAIL and ADMIN_PASSWORD before starting the live site.")
             password = "Admin123!"   # demo password, only ever used on your own computer
         conn.execute("INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'ADMIN')",
-                     ("NextFit Admin", email.strip().lower(), generate_password_hash(password)))
+                     (admin_name, email.strip().lower(), generate_password_hash(password)))
 
     if os.environ.get("NEXTFIT_SEED", "1") == "1":
         import seed
