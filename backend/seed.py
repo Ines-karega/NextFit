@@ -69,10 +69,11 @@ def add_real_opportunities(conn):
     return added
 
 
-def add_starting_data(conn, with_samples=True):
+def add_starting_data(conn, added_by, with_samples=True):
     """Fill an empty database. Real listings win: when the CSV has rows, the sample
     listings are not added. On the live site (with_samples=False) only the real
-    listings are loaded: no sample listings and no demo account with a known password."""
+    listings are loaded: no sample listings and no demo account with a known password.
+    added_by is the id of the first admin: the starting listings are recorded under that account."""
     if conn.execute("SELECT COUNT(*) AS n FROM opportunities").fetchone()["n"] == 0:
         if add_real_opportunities(conn) == 0 and with_samples:
             today = date.today()
@@ -84,6 +85,7 @@ def add_starting_data(conn, with_samples=True):
                     (title, desc, typ, skills, prov, dist, mode,
                      (today + timedelta(days=days)).isoformat(),
                      "https://example.org/apply", lo, hi, edu))
+        conn.execute("UPDATE opportunities SET added_by = ?", (added_by,))
     if with_samples:
         _add_demo_seeker(conn)
 

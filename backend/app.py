@@ -418,13 +418,14 @@ def admin_opportunities():
 
 @app.route("/admin/opportunities/new", methods=["GET", "POST"])
 def admin_add():
-    if admin_only() is None:
+    admin = admin_only()
+    if admin is None:
         abort(403)
     errors = {}
     if request.method == "POST":
         errors = check_opportunity_form(request.form)
         if not errors:
-            db.add_opportunity(opportunity_values(request.form))
+            db.add_opportunity(opportunity_values(request.form), admin["id"])   # remember who added it
             flash("Opportunity added.", "success")
             return redirect(url_for("admin_opportunities"))
         return render_template("admin_form.html", errors=errors, o=request.form,
