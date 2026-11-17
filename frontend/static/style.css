@@ -104,6 +104,12 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { background: var(--green-soft); color: var(--green-dark); text-align: left; }
 th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 td button { padding: 5px 12px; font-size: 13px; }
+/* Edit / Close / Remove in the admin's list: one row, evenly spaced, never stacked */
+.row-actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; }
+.row-actions form { margin: 0; }
+.row-actions button, .button.small { padding: 6px 14px; font-size: 13px; white-space: nowrap; }
+.button.small { background: var(--green-soft); color: var(--green-dark); }
+.button.small:hover { background: #cfe9e4; }
 
 @media (min-width: 640px) {
   .filters .row { grid-template-columns: 1fr 1fr; }
@@ -111,3 +117,4 @@ td button { padding: 5px 12px; font-size: 13px; }
   .hero { padding: 48px 40px; }
   .hero h1 { font-size: 38px; }
 }
+.show-password { display: block; margin: 8px 0 0; font-size: 14px; color: var(--muted); }

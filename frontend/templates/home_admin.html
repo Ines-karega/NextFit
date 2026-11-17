@@ -3,12 +3,20 @@
 {% block content %}
 <div class="hero">
   <h1>Welcome, {{ user['name'].split()[0] }}</h1>
-  <p>Keep the opportunities accurate and up to date so seekers get good matches.</p>
+  <p>You are logged in as an <strong>admin</strong>. Keep the opportunities accurate and up to date so seekers get good matches.</p>
   <div class="actions">
     <a class="button big" href="{{ url_for('admin_add') }}">Add opportunity</a>
     <a class="button grey big" href="{{ url_for('admin_opportunities') }}">Manage opportunities</a>
   </div>
 </div>
+
+{% if counts['expired'] %}
+  <div class="reminder">
+    <strong>{{ counts['expired'] }} opportunit{{ 'y has' if counts['expired'] == 1 else 'ies have' }} passed the deadline.</strong>
+    Seekers no longer see {{ 'it' if counts['expired'] == 1 else 'them' }}.
+    <a href="{{ url_for('admin_opportunities') }}">Close or remove {{ 'it' if counts['expired'] == 1 else 'them' }}</a>.
+  </div>
+{% endif %}
 
 <h2>At a glance</h2>
 <div class="steps">

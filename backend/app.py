@@ -114,8 +114,8 @@ def home():
     if user is None:
         return render_template("home.html")
     if user["role"] == "ADMIN":
-        counts = {"open": db.count_opportunities("OPEN"), "closed": db.count_opportunities("CLOSED"),
-                  "seekers": db.count_seekers()}
+        counts = db.count_opportunities(date.today().isoformat())   # open, expired, closed
+        counts["seekers"] = db.count_seekers()
         return render_template("home_admin.html", counts=counts)
 
     # Seeker home: a short summary of what is waiting for them
@@ -143,8 +143,8 @@ def help_page():
 
 @app.route("/health")
 def health():
-    """A tiny page for the uptime monitor to visit every 5 minutes, so the free
-    hosting plan does not put the site to sleep. It does not use the database."""
+    """A tiny page that answers "ok" when the site is running. It does not use the
+    database, so it is a quick way to check that the live site is up."""
     return "ok"
 
 
@@ -395,6 +395,9 @@ def check_opportunity_form(form):
         errors["deadline"] = "Please choose a deadline date."
     if not (form["min_age"].isdigit() and form["max_age"].isdigit()) or int(form["min_age"]) > int(form["max_age"]):
         errors["age"] = "Enter a minimum and maximum age (minimum cannot be bigger)."
+    advert = form.get("advert_link", "").strip()
+    if advert and not advert.startswith(("http://", "https://")):
+        errors["advert_link"] = "This must be a web address starting with https://"
     chosen = form.getlist("education")
     if len(chosen) == 0 or any(level not in EDU_LABEL for level in chosen):
         errors["education"] = "Choose at least one education level."
@@ -406,14 +409,16 @@ def opportunity_values(form):
     return (form["title"].strip(), form["description"].strip(), form["type"],
             ", ".join(matching.split_skills(form["required_skills"])), form["province"],
             form["district"], form["work_mode"], form["deadline"], form["apply_link"].strip(),
-            int(form["min_age"]), int(form["max_age"]), ",".join(form.getlist("education")))
+            int(form["min_age"]), int(form["max_age"]), ",".join(form.getlist("education")),
+            form.get("advert_link", "").strip())
 
 
 @app.route("/admin/opportunities")
 def admin_opportunities():
     if admin_only() is None:
         abort(403)
-    return render_template("admin_opps.html", opps=db.get_all_opportunities())
+    # today is passed in so the page can mark listings whose deadline has passed
+    return render_template("admin_opps.html", opps=db.get_all_opportunities(), today=date.today().isoformat())
 
 
 @app.route("/admin/opportunities/new", methods=["GET", "POST"])

@@ -20,6 +20,11 @@ DB_FILE = os.environ.get("NEXTFIT_DB", os.path.join(PROJECT_FOLDER, "nextfit.db"
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
 ON_LIVE_SITE = DATABASE_URL != ""
 
+# Vercel (the hosting company) cannot keep a SQLite file, so stop with a clear message
+# instead of failing later in a confusing way. Vercel sets VERCEL=1 by itself.
+if os.environ.get("VERCEL") and not ON_LIVE_SITE:
+    raise RuntimeError("Set DATABASE_URL (the PostgreSQL address from Neon) in the Vercel project settings.")
+
 if ON_LIVE_SITE:
     import psycopg
     from psycopg.rows import dict_row
@@ -45,6 +50,7 @@ CREATE TABLE IF NOT EXISTS opportunities (
     title TEXT, description TEXT, type TEXT, required_skills TEXT,
     province TEXT, district TEXT, work_mode TEXT, deadline TEXT,
     apply_link TEXT, min_age INTEGER, max_age INTEGER,
+    advert_link TEXT,             -- optional link to the full advert
     education TEXT,               -- accepted levels, e.g. 'TVET,BACHELORS'
     status TEXT DEFAULT 'OPEN',   -- 'OPEN' or 'CLOSED'
     added_by INTEGER              -- the id of the admin who added it
@@ -61,7 +67,7 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 
 # The opportunity columns, in the order the admin form sends them.
 OPPORTUNITY_COLUMNS = ("title, description, type, required_skills, province, district, "
-                       "work_mode, deadline, apply_link, min_age, max_age, education")
+                       "work_mode, deadline, apply_link, min_age, max_age, education, advert_link")
 
 
 # ---------------- opening and closing the database ----------------
@@ -133,18 +139,21 @@ def setup():
         conn.execute("SELECT pg_advisory_xact_lock(20260917)")
     conn.run_script(TABLES)
     conn.add_column_if_missing("opportunities", "added_by", "INTEGER")
+    conn.add_column_if_missing("opportunities", "advert_link", "TEXT")
 
     # The first admin is created here, once (SRS FR1.1).
     admin = conn.execute("SELECT id FROM users WHERE role = 'ADMIN'").fetchone()
     if admin is None:
         email = os.environ.get("ADMIN_EMAIL", "admin@nextfit.rw")
+        # The name shown in the menu greeting and in the "Added by" column of the admin's list.
+        admin_name = os.environ.get("ADMIN_NAME", "").strip() or "NextFit Admin"
         password = os.environ.get("ADMIN_PASSWORD", "")
         if password == "":
             if ON_LIVE_SITE:
                 raise RuntimeError("Set ADMIN_EMAIL and ADMIN_PASSWORD before starting the live site.")
             password = "Admin123!"   # demo password, only ever used on your own computer
         conn.execute("INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, 'ADMIN')",
-                     ("NextFit Admin", email.strip().lower(), generate_password_hash(password)))
+                     (admin_name, email.strip().lower(), generate_password_hash(password)))
 
     if os.environ.get("NEXTFIT_SEED", "1") == "1":
         import seed
@@ -250,22 +259,33 @@ def get_opportunity(opp_id):
     return connect().execute("SELECT * FROM opportunities WHERE id = ?", (opp_id,)).fetchone()
 
 
-def count_opportunities(status):
-    return connect().execute("SELECT COUNT(*) AS n FROM opportunities WHERE status = ?", (status,)).fetchone()["n"]
+def count_opportunities(today):
+    """For the admin's home page. Returns three numbers:
+    open = seekers can see them, expired = the deadline has passed but the admin
+    has not closed them yet, closed = the admin closed them."""
+    counts = {"open": 0, "expired": 0, "closed": 0}
+    for row in connect().execute("SELECT status, deadline FROM opportunities").fetchall():
+        if row["status"] == "CLOSED":
+            counts["closed"] += 1
+        elif row["deadline"] < today:
+            counts["expired"] += 1
+        else:
+            counts["open"] += 1
+    return counts
 
 
 def add_opportunity(values, admin_id):
-    """values: the 12 fields in the order of OPPORTUNITY_COLUMNS.
+    """values: the 13 fields in the order of OPPORTUNITY_COLUMNS.
     admin_id: the admin who is adding it, so the admin's list can show who added what."""
     conn = connect()
-    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}, added_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}, added_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                  tuple(values) + (admin_id,))
     conn.commit()
 
 
 def update_opportunity(opp_id, values):
     conn = connect()
-    conn.execute(f"UPDATE opportunities SET ({OPPORTUNITY_COLUMNS}) = (?,?,?,?,?,?,?,?,?,?,?,?) WHERE id = ?",
+    conn.execute(f"UPDATE opportunities SET ({OPPORTUNITY_COLUMNS}) = (?,?,?,?,?,?,?,?,?,?,?,?,?) WHERE id = ?",
                  tuple(values) + (opp_id,))
     conn.commit()
 

@@ -32,3 +32,41 @@ for (var i = 0; i < provinceBoxes.length; i++) {
     });
   })(provinceBoxes[i]);
 }
+
+// Adds a "Show password" tick box under every password box, so people can
+// check what they typed. Ticking it shows the letters; unticking hides them again.
+var passwordBoxes = document.querySelectorAll('input[type="password"]');
+for (var j = 0; j < passwordBoxes.length; j++) {
+  (function (passwordBox) {
+    var tick = document.createElement("input");
+    tick.type = "checkbox";
+    var label = document.createElement("label");
+    label.className = "check show-password";
+    label.appendChild(tick);
+    label.appendChild(document.createTextNode(" Show password"));
+    passwordBox.insertAdjacentElement("afterend", label);
+    tick.addEventListener("change", function () {
+      passwordBox.type = tick.checked ? "text" : "password";
+    });
+  })(passwordBoxes[j]);
+}
+
+// "Copy email address" buttons on opportunity cards: copy the address so it can be
+// pasted into a new email, for people whose device does not open an email app.
+var copyButtons = document.querySelectorAll("button.copy-email");
+for (var k = 0; k < copyButtons.length; k++) {
+  (function (button) {
+    button.addEventListener("click", function () {
+      var address = button.getAttribute("data-email");
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(address).then(function () {
+          button.textContent = "Copied!";
+          // go back to the normal label after 2 seconds, so it can be used again
+          setTimeout(function () { button.textContent = "Copy email address"; }, 2000);
+        });
+      } else {
+        window.prompt("Copy this email address:", address);   // older browsers
+      }
+    });
+  })(copyButtons[k]);
+}
