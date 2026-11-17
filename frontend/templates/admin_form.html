@@ -56,7 +56,7 @@
   {% endfor %}
   {% if errors.education %}<p class="error">{{ errors.education }}</p>{% endif %}
 
-  <label for="required_skills">Required skills (commas; leave empty if none)</label>
+  <label for="required_skills">Required skills: put a comma between each one, for example: Excel, Accounting, Customer service. Leave empty if none are needed.</label>
   <input id="required_skills" name="required_skills" value="{{ o['required_skills'] or '' }}">
 
   <p><button>Save</button> <a href="{{ url_for('admin_opportunities') }}">Cancel</a></p>

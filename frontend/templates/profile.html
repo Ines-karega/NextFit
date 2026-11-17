@@ -33,7 +33,7 @@
   </select>
   {% if errors.status %}<p class="error">{{ errors.status }}</p>{% endif %}
 
-  <label for="skills">Your skills (separate with commas)</label>
+  <label for="skills">Your skills: put a comma between each one, for example: Excel, Accounting, Customer service.</label>
   <textarea id="skills" name="skills" rows="3" placeholder="Example: Excel, Communication, English">{{ form['skills'] or '' }}</textarea>
   {% if errors.skills %}<p class="error">{{ errors.skills }}</p>{% endif %}
 

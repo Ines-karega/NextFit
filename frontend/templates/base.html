@@ -9,7 +9,9 @@
 <body>
   <header>
     <a class="logo" href="{{ url_for('home') }}">Next<span>Fit</span></a>
-    <nav>
+    {# On phones the menu is folded away behind this button (see app.js); on bigger screens the button is hidden #}
+    <button type="button" class="menu-toggle" aria-controls="main-menu" aria-expanded="false">Menu</button>
+    <nav id="main-menu">
       <a href="{{ url_for('home') }}">Home</a>
       {% if user and user['role'] == 'SEEKER' %}
         <a href="{{ url_for('dashboard') }}">My matches</a>

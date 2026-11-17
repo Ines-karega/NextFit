@@ -25,6 +25,18 @@ header { background: #fff; border-bottom: 3px solid var(--green); box-shadow: va
 nav { display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: center; }
 nav a, nav button.link { color: var(--text); text-decoration: none; font-size: 15px; font-weight: 600; padding: 6px 10px; border-radius: 20px; }
 nav a:hover, nav button.link:hover { background: var(--green-soft); color: var(--green-dark); }
+/* Phones: one Menu button; tapping it shows the menu as a list under the top bar */
+.menu-toggle { background: var(--green-soft); color: var(--green-dark); padding: 8px 16px; font-size: 15px; }
+.menu-toggle:hover { background: #cfe9e4; }
+@media (max-width: 699px) {
+  nav { display: none; flex-basis: 100%; flex-direction: column; align-items: stretch; padding: 6px 0 4px; }
+  nav.open { display: flex; }
+  nav a, nav button.link { display: block; width: 100%; text-align: left; padding: 11px 12px; font-size: 16px; }
+  nav form.inline { display: block; }
+}
+@media (min-width: 700px) {
+  .menu-toggle { display: none; }
+}
 
 main { max-width: 860px; margin: 0 auto; padding: 20px 16px 8px; }
 footer { text-align: center; color: var(--muted); font-size: 13px; padding: 28px 16px; }
