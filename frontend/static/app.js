@@ -70,3 +70,14 @@ for (var k = 0; k < copyButtons.length; k++) {
     });
   })(copyButtons[k]);
 }
+
+// Phones: the "Menu" button opens and closes the menu.
+var menuButton = document.querySelector(".menu-toggle");
+var menu = document.getElementById("main-menu");
+if (menuButton && menu) {
+  menuButton.addEventListener("click", function () {
+    var isOpen = menu.classList.toggle("open");
+    menuButton.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    menuButton.textContent = isOpen ? "Close" : "Menu";
+  });
+}
