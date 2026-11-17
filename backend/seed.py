@@ -42,7 +42,8 @@ OPPS = [
 def add_real_opportunities(conn):
     """Load the real listings from real_opportunities.csv (filled in by the admin).
     Columns: title,type,province,district,work_mode,deadline(YYYY-MM-DD),apply_link,
-    min_age,max_age,education(e.g. TVET,BACHELORS in quotes),required_skills,description,source
+    min_age,max_age,education(e.g. TVET,BACHELORS in quotes),required_skills,description,source,
+    advert_link (optional: the web page of the full advert)
     Returns how many rows were added."""
     path = os.path.join(os.path.dirname(__file__), "real_opportunities.csv")
     if not os.path.exists(path):
@@ -56,13 +57,13 @@ def add_real_opportunities(conn):
                 date.fromisoformat(row["deadline"].strip())
                 conn.execute(
                     "INSERT INTO opportunities (title,description,type,required_skills,province,"
-                    "district,work_mode,deadline,apply_link,min_age,max_age,education) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "district,work_mode,deadline,apply_link,min_age,max_age,education,advert_link) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (row["title"].strip(), row["description"].strip(), row["type"].strip().upper(),
                      row["required_skills"].strip(), row["province"].strip(), row["district"].strip(),
                      row["work_mode"].strip().upper(), row["deadline"].strip(),
                      row["apply_link"].strip(), int(row["min_age"]), int(row["max_age"]),
-                     row["education"].strip().upper()))
+                     row["education"].strip().upper(), (row.get("advert_link") or "").strip()))
                 added += 1
             except (ValueError, KeyError, AttributeError):
                 print("Skipped a bad row in real_opportunities.csv:", row.get("title"))

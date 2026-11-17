@@ -39,6 +39,10 @@
   <input id="apply_link" name="apply_link" value="{{ o['apply_link'] or '' }}">
   {% if errors.apply_link %}<p class="error">{{ errors.apply_link }}</p>{% endif %}
 
+  <label for="advert_link">Link to the full advert (optional, but needed when people apply by email or phone)</label>
+  <input id="advert_link" name="advert_link" placeholder="https://" value="{{ o['advert_link'] or '' }}">
+  {% if errors.advert_link %}<p class="error">{{ errors.advert_link }}</p>{% endif %}
+
   <h2>Who is it for? (eligibility rules)</h2>
   <label for="min_age">Minimum age</label>
   <input id="min_age" name="min_age" type="number" value="{{ o['min_age'] }}">

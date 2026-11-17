@@ -32,15 +32,33 @@
   </ul>
 
   {# FR3.1: the admin gives an application link or a contact (an email address or a phone number) #}
+  {# advert = optional link to the full advert, which says exactly what the employer wants #}
   {% set apply = o['apply_link'] | replace('mailto:', '') %}
-  {% if not apply.startswith('http') %}
-    <p>How to apply: {% if '@' in apply %}send your application by email to {% endif %}<strong>{{ apply }}</strong></p>
+  {% set advert = o['advert_link'] or '' %}
+  {% set is_link = apply.startswith('http://') or apply.startswith('https://') %}
+  {% set is_email = not is_link and '@' in apply %}
+  {% if is_email %}
+    <p>How to apply: by email to <strong>{{ apply }}</strong></p>
+    {% if advert %}
+      <p><small>Before you write, open the full advert: it says exactly what to send (for example your CV, a cover letter
+      or certificates). Write "{{ o['title'] }}" as the subject of your email.</small></p>
+    {% else %}
+      <p><small>There is no link to the full advert for this opportunity. Send your CV and a short letter saying you are
+      applying for "{{ o['title'] }}", and write that title as the subject of your email.</small></p>
+    {% endif %}
+  {% elif not is_link %}
+    <p>How to apply: <strong>{{ apply }}</strong></p>
+    {% if advert %}<p><small>Open the full advert to see what is needed before you get in touch.</small></p>{% endif %}
   {% endif %}
   <p>
-    {% if apply.startswith('http://') or apply.startswith('https://') %}
+    {% if is_link %}
       <a class="button" href="{{ apply }}" target="_blank" rel="noopener">Apply</a>
-    {% elif '@' in apply %}
-      <a class="button" href="mailto:{{ apply }}">Apply by email</a>
+    {% endif %}
+    {% if advert and advert != apply %}
+      <a class="button {{ 'grey' if is_link }}" href="{{ advert }}" target="_blank" rel="noopener">Read the full advert</a>
+    {% endif %}
+    {% if is_email %}
+      <button type="button" class="grey copy-email" data-email="{{ apply }}">Copy email address</button>
     {% endif %}
     {% if o['id'] in saved %}
       <form class="inline" method="post" action="{{ url_for('unsave', opp_id=o['id']) }}">

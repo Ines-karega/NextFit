@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS opportunities (
     title TEXT, description TEXT, type TEXT, required_skills TEXT,
     province TEXT, district TEXT, work_mode TEXT, deadline TEXT,
     apply_link TEXT, min_age INTEGER, max_age INTEGER,
+    advert_link TEXT,             -- optional link to the full advert
     education TEXT,               -- accepted levels, e.g. 'TVET,BACHELORS'
     status TEXT DEFAULT 'OPEN',   -- 'OPEN' or 'CLOSED'
     added_by INTEGER              -- the id of the admin who added it
@@ -66,7 +67,7 @@ CREATE TABLE IF NOT EXISTS reset_tokens (
 
 # The opportunity columns, in the order the admin form sends them.
 OPPORTUNITY_COLUMNS = ("title, description, type, required_skills, province, district, "
-                       "work_mode, deadline, apply_link, min_age, max_age, education")
+                       "work_mode, deadline, apply_link, min_age, max_age, education, advert_link")
 
 
 # ---------------- opening and closing the database ----------------
@@ -138,6 +139,7 @@ def setup():
         conn.execute("SELECT pg_advisory_xact_lock(20260917)")
     conn.run_script(TABLES)
     conn.add_column_if_missing("opportunities", "added_by", "INTEGER")
+    conn.add_column_if_missing("opportunities", "advert_link", "TEXT")
 
     # The first admin is created here, once (SRS FR1.1).
     admin = conn.execute("SELECT id FROM users WHERE role = 'ADMIN'").fetchone()
@@ -273,17 +275,17 @@ def count_opportunities(today):
 
 
 def add_opportunity(values, admin_id):
-    """values: the 12 fields in the order of OPPORTUNITY_COLUMNS.
+    """values: the 13 fields in the order of OPPORTUNITY_COLUMNS.
     admin_id: the admin who is adding it, so the admin's list can show who added what."""
     conn = connect()
-    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}, added_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    conn.execute(f"INSERT INTO opportunities ({OPPORTUNITY_COLUMNS}, added_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                  tuple(values) + (admin_id,))
     conn.commit()
 
 
 def update_opportunity(opp_id, values):
     conn = connect()
-    conn.execute(f"UPDATE opportunities SET ({OPPORTUNITY_COLUMNS}) = (?,?,?,?,?,?,?,?,?,?,?,?) WHERE id = ?",
+    conn.execute(f"UPDATE opportunities SET ({OPPORTUNITY_COLUMNS}) = (?,?,?,?,?,?,?,?,?,?,?,?,?) WHERE id = ?",
                  tuple(values) + (opp_id,))
     conn.commit()
 

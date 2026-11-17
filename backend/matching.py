@@ -86,7 +86,8 @@ def check(profile, opp):
     if len(have) > 0:
         reasons.append((True, "Skills you have: " + ", ".join(have) + "."))
     if len(missing) > 0:
-        reasons.append((skills_ok, "Skills you are missing: " + ", ".join(missing) + "."))
+        # shown with a cross, because these are skills the seeker does not have yet
+        reasons.append((False, "Skills you are missing: " + ", ".join(missing) + "."))
 
     return {
         "opp": opp,

@@ -395,6 +395,9 @@ def check_opportunity_form(form):
         errors["deadline"] = "Please choose a deadline date."
     if not (form["min_age"].isdigit() and form["max_age"].isdigit()) or int(form["min_age"]) > int(form["max_age"]):
         errors["age"] = "Enter a minimum and maximum age (minimum cannot be bigger)."
+    advert = form.get("advert_link", "").strip()
+    if advert and not advert.startswith(("http://", "https://")):
+        errors["advert_link"] = "This must be a web address starting with https://"
     chosen = form.getlist("education")
     if len(chosen) == 0 or any(level not in EDU_LABEL for level in chosen):
         errors["education"] = "Choose at least one education level."
@@ -406,7 +409,8 @@ def opportunity_values(form):
     return (form["title"].strip(), form["description"].strip(), form["type"],
             ", ".join(matching.split_skills(form["required_skills"])), form["province"],
             form["district"], form["work_mode"], form["deadline"], form["apply_link"].strip(),
-            int(form["min_age"]), int(form["max_age"]), ",".join(form.getlist("education")))
+            int(form["min_age"]), int(form["max_age"]), ",".join(form.getlist("education")),
+            form.get("advert_link", "").strip())
 
 
 @app.route("/admin/opportunities")
