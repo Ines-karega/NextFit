@@ -155,7 +155,20 @@ class Journeys(unittest.TestCase):
         self.assertIn("This field is required", page)
         self.assertIn("Choose at least one education level", page)
 
+    def test_district_not_stated_is_shown_honestly(self):
+        self.add_opportunity("Journey somewhere in Kigali", district="Not stated")
+        dashboard = self.page(self.new_seeker("district@example.com"), "/dashboard")
+        card = dashboard[dashboard.index("Journey somewhere in Kigali"):]
+        card = card[:card.index("Stay safe")]
+        self.assertIn("Kigali City (district not stated)", card)
+        self.assertNotIn("In your district", card)
 
+    def test_a_seeker_must_choose_a_real_district(self):
+        browser = self.new_seeker("realdistrict@example.com")
+        page = browser.post("/profile", data={"age": "22", "province": "Kigali City", "district": "Not stated",
+                                              "education": "BACHELORS", "status": "Graduate",
+                                              "skills": "Excel"}).get_data(as_text=True)
+        self.assertIn("Please choose your province, then your district", page)
 
     # ---------- FR6, FR9: search and browse ----------
     def test_search_and_browse_all(self):

@@ -405,8 +405,8 @@ def check_opportunity_form(form):
         errors["type"] = "Please choose a type."
     if form["work_mode"] not in MODE_LABEL:
         errors["work_mode"] = "Please choose a work mode."
-    if not valid_location(form["province"], form["district"]):
-        errors["district"] = "Please choose a province and a district."
+    if not valid_location(form["province"], form["district"], allow_not_stated=True):
+        errors["district"] = "Please choose a province and a district (or District not stated)."
     try:
         date.fromisoformat(form["deadline"])
     except ValueError:

@@ -56,6 +56,10 @@ class TheThreeRules(unittest.TestCase):
     def test_skills_compare_without_capital_letters(self):
         self.assertTrue(matching.check(dict(SEEKER, skills="EXCEL"), opportunity())["eligible"])
 
+    def test_district_not_stated_is_never_counted_as_the_seekers_district(self):
+        result = matching.check(SEEKER, opportunity(district="Not stated"))
+        self.assertTrue(result["eligible"])
+        self.assertFalse(result["in_district"])
 
     def test_district_is_not_a_rule(self):
         far_away = opportunity(province="Western", district="Rusizi")

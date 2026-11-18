@@ -11,11 +11,13 @@ function fillDistricts(provinceSelect, districtSelect) {
   first.textContent = districtSelect.getAttribute("data-empty") || "Choose district";
   districtSelect.appendChild(first);
 
-  var list = LOCATIONS[province] || [];
+  var list = (LOCATIONS[province] || []).slice();
+  // The admin form can also say the advert did not name the district (only when a province is chosen)
+  if (districtSelect.hasAttribute("data-allow-not-stated") && list.length) { list.push("Not stated"); }
   for (var i = 0; i < list.length; i++) {
     var option = document.createElement("option");
     option.value = list[i];
-    option.textContent = list[i];
+    option.textContent = list[i] === "Not stated" ? "District not stated" : list[i];
     if (list[i] === chosen) { option.selected = true; }
     districtSelect.appendChild(option);
   }

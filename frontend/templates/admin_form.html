@@ -22,7 +22,7 @@
     {% for p in LOCATIONS %}<option {{ 'selected' if o['province'] == p }}>{{ p }}</option>{% endfor %}
   </select>
   <label for="district">District</label>
-  <select id="district" name="district" class="district" data-selected="{{ o['district'] or '' }}"></select>
+  <select id="district" name="district" class="district" data-allow-not-stated="1" data-selected="{{ o['district'] or '' }}"></select>
   {% if errors.district %}<p class="error">{{ errors.district }}</p>{% endif %}
 
   <label for="work_mode">Work mode</label>
