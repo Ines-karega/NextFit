@@ -4,6 +4,7 @@ This file is the "route controller" of SRS Appendix B.4: it receives each reques
 asks matching.py and db.py for what it needs, and sends back the page.
 """
 import os
+import re
 import secrets
 from datetime import date, datetime, timedelta
 
@@ -53,6 +54,24 @@ def days_text(days):
 
 
 # ---------------- small helper functions ----------------
+def email_problem(email):
+    """A plain-English message if the email address is clearly not complete, otherwise None.
+    It must look like name@place.ending, with no spaces (for example aline@gmail.com)."""
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]{2,}", email):
+        return "Please enter a full email address, for example aline@gmail.com."
+    return None
+
+
+def password_problem(password):
+    """A plain-English message if the password is too weak, otherwise None (NFR2).
+    It needs at least 8 characters, with at least one letter and one number."""
+    if len(password) < 8:
+        return "Your password needs at least 8 characters."
+    if not re.search(r"[A-Za-z]", password) or not re.search(r"[0-9]", password):
+        return "Your password needs at least one letter and one number."
+    return None
+
+
 def current_user():
     """The logged-in user (a database row), or None. Looked up once per page."""
     if "user_id" not in session:
@@ -158,10 +177,10 @@ def signup():
         password = request.form["password"]
         if name == "":
             errors["name"] = "Please enter your name."
-        if "@" not in email:
-            errors["email"] = "Please enter a valid email address."
-        if len(password) < 8:
-            errors["password"] = "Your password needs at least 8 characters."
+        if email_problem(email):
+            errors["email"] = email_problem(email)
+        if password_problem(password):
+            errors["password"] = password_problem(password)
         if not errors:
             try:
                 # The role is always SEEKER here: admins cannot sign up publicly (FR1.1).
@@ -192,7 +211,6 @@ def logout():
 
 @app.route("/forgot", methods=["GET", "POST"])
 def forgot():
-    link = None
     if request.method == "POST":
         email = request.form["email"].strip().lower()
         found = db.get_user_by_email(email)
@@ -202,16 +220,16 @@ def forgot():
             db.add_reset_token(token, found["id"], expires)
             reset_link = url_for("reset", token=token, _external=True)
             sent = emailer.send_reset_email(email, reset_link)
-            if not sent and not emailer.email_is_set_up():
-                link = reset_link  # demo mode: no email service set up, so show the link here
+            # On a copy running on a developer's own computer with no email set up, the link is printed in
+            # the terminal (never on the page), so the developer can still test the reset. The live site
+            # never does this: there, only the owner of the email address receives the link (FR1.3).
+            if not sent and not emailer.email_is_set_up() and not db.ON_LIVE_SITE:
+                print("Email is not set up on this computer. Password reset link:", reset_link)
         # The same message is shown whether or not the account exists, so nobody can
         # use this page to find out who has an account (NFR9).
-        if emailer.email_is_set_up():
-            flash("If that email has an account, we have sent a reset link to it. "
-                  "Please check your inbox, and your spam folder too.", "info")
-        else:
-            flash("If that email has an account, a reset link is ready below.", "info")
-    return render_template("forgot.html", link=link)
+        flash("If that email has an account, we have sent a reset link to it. "
+              "Please check your inbox, and your spam folder too.", "info")
+    return render_template("forgot.html")
 
 
 @app.route("/reset/<token>", methods=["GET", "POST"])
@@ -222,8 +240,8 @@ def reset(token):
         return redirect(url_for("forgot"))
     errors = {}
     if request.method == "POST":
-        if len(request.form["password"]) < 8:
-            errors["password"] = "Your password needs at least 8 characters."
+        if password_problem(request.form["password"]):
+            errors["password"] = password_problem(request.form["password"])
         else:
             db.set_password(row["user_id"], generate_password_hash(request.form["password"]))
             db.delete_reset_tokens(row["user_id"])
@@ -387,8 +405,8 @@ def check_opportunity_form(form):
         errors["type"] = "Please choose a type."
     if form["work_mode"] not in MODE_LABEL:
         errors["work_mode"] = "Please choose a work mode."
-    if not valid_location(form["province"], form["district"]):
-        errors["district"] = "Please choose a province and a district."
+    if not valid_location(form["province"], form["district"], allow_not_stated=True):
+        errors["district"] = "Please choose a province and a district (or District not stated)."
     try:
         date.fromisoformat(form["deadline"])
     except ValueError:
@@ -486,10 +504,10 @@ def admin_users():
         email = request.form["email"].strip().lower()
         if name == "":
             errors["name"] = "Please enter a name."
-        if "@" not in email:
-            errors["email"] = "Please enter a valid email."
-        if len(request.form["password"]) < 8:
-            errors["password"] = "At least 8 characters."
+        if email_problem(email):
+            errors["email"] = email_problem(email)
+        if password_problem(request.form["password"]):
+            errors["password"] = password_problem(request.form["password"])
         if not errors:
             try:
                 db.add_user(name, email, generate_password_hash(request.form["password"]), "ADMIN")

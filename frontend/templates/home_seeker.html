@@ -20,7 +20,8 @@
   <div class="card {{ top_pick['opp']['type'] | lower }}">
     <h3>{{ top_pick['opp']['title'] }}</h3>
     <span class="badge">{{ TYPE_LABEL[top_pick['opp']['type']] }}</span>
-    <span class="badge">Location: {{ top_pick['opp']['district'] }}, {{ top_pick['opp']['province'] }}</span>
+    {% if top_pick['opp']['district'] == 'Not stated' %}<span class="badge">Location: {{ top_pick['opp']['province'] }} (district not stated)</span>
+    {% else %}<span class="badge">Location: {{ top_pick['opp']['district'] }}, {{ top_pick['opp']['province'] }}</span>{% endif %}
     {% if top_pick['in_district'] %}<span class="badge full">In your district ({{ top_pick['opp']['district'] }})</span>{% endif %}
     {% if top_pick['skill_match'] == 'FULL' %}<span class="badge full">Full skill match</span>{% endif %}
     <p>{{ top_pick['opp']['description'] }}</p>

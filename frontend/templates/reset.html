@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Choose a new password</h1>
 <form method="post">
-  <label for="password">New password (at least 8 characters)</label>
+  <label for="password">New password (at least 8 characters, with at least one letter and one number)</label>
   <input id="password" name="password" type="password">
   {% if errors.password %}<p class="error">{{ errors.password }}</p>{% endif %}
   <p><button>Save password</button></p>

@@ -5,9 +5,14 @@
   <h3>{{ o['title'] }}</h3>
   <span class="badge">{{ TYPE_LABEL[o['type']] }}</span>
   <span class="badge">{{ MODE_LABEL[o['work_mode']] }}</span>
-  <span class="badge">Location: {{ o['district'] }}, {{ o['province'] }}</span>
-  {% if m['in_district'] %}<span class="badge full">In your district ({{ o['district'] }})</span>
-  {% else %}<span class="badge warn">Outside your district</span>{% endif %}
+  {% if o['district'] == 'Not stated' %}
+    <span class="badge">Location: {{ o['province'] }} (district not stated)</span>
+    <span class="badge warn">District not stated</span>
+  {% else %}
+    <span class="badge">Location: {{ o['district'] }}, {{ o['province'] }}</span>
+    {% if m['in_district'] %}<span class="badge full">In your district ({{ o['district'] }})</span>
+    {% else %}<span class="badge warn">Outside your district</span>{% endif %}
+  {% endif %}
   {% if m['skill_match'] == 'FULL' %}<span class="badge full">Full skill match</span>
   {% elif m['skill_match'] == 'PARTIAL' %}<span class="badge warn">Partial skill match</span>
   {% else %}<span class="badge warn">No skill match</span>{% endif %}

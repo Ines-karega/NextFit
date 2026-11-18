@@ -6,6 +6,7 @@ A seeker matches an opportunity only if ALL THREE rules pass:
   3. the seeker has at least one required skill (or none are required)
 District is NOT a rule. It only changes the order of the list.
 """
+import re
 from datetime import date
 
 import db
@@ -22,10 +23,30 @@ def split_skills(text):
     return skills
 
 
+def skill_words(skill):
+    """'MS Excel' -> {'ms', 'excel'}: the words of a skill, in lowercase, without punctuation."""
+    return set(re.findall(r"[a-z0-9]+", skill.lower()))
+
+
+def same_skill(a, b):
+    """Two skills count as the same when all the words of one appear in the other.
+    'Excel' and 'MS Excel' match, and so do 'EXCEL' and 'excel' (capital letters never matter).
+    'Data entry' and 'Data analysis' do not match, because neither contains all the other's words."""
+    words_a, words_b = skill_words(a), skill_words(b)
+    if not words_a or not words_b:
+        return False
+    return words_a <= words_b or words_b <= words_a
+
+
+def has_skill(skill, my_skills):
+    """True if any of the seeker's skills counts as the same as this skill."""
+    return any(same_skill(skill, mine) for mine in my_skills)
+
+
 def skills_in_demand(profile, opportunities, how_many=5):
     """The skills asked for most often in open opportunities.
     Returns a list of (skill, number_of_opportunities, you_have_it)."""
-    my_skills = [s.lower() for s in split_skills(profile["skills"])]
+    my_skills = split_skills(profile["skills"])
     counts = {}
     names = {}
     for opp in opportunities:
@@ -36,7 +57,7 @@ def skills_in_demand(profile, opportunities, how_many=5):
             counts[key] = counts.get(key, 0) + 1
             names[key] = skill
     top = sorted(counts, key=lambda k: -counts[k])[:how_many]
-    return [(names[k], counts[k], k in my_skills) for k in top]
+    return [(names[k], counts[k], has_skill(names[k], my_skills)) for k in top]
 
 
 def days_until(deadline_text):
@@ -58,11 +79,11 @@ def check(profile, opp):
     accepted = [level.strip() for level in opp["education"].split(",") if level.strip()]
     edu_ok = profile["education"] in accepted
 
-    # Rule 3: skills (compare in lowercase so 'Excel' equals 'excel')
-    my_skills = [s.lower() for s in split_skills(profile["skills"])]
+    # Rule 3: skills ('Excel' matches 'excel' and 'MS Excel'; see same_skill above)
+    my_skills = split_skills(profile["skills"])
     required = split_skills(opp["required_skills"])
-    have = [s for s in required if s.lower() in my_skills]
-    missing = [s for s in required if s.lower() not in my_skills]
+    have = [s for s in required if has_skill(s, my_skills)]
+    missing = [s for s in required if not has_skill(s, my_skills)]
     skills_ok = len(required) == 0 or len(have) > 0
 
     # FR4.4: full or partial skill match

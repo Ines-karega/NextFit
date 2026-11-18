@@ -34,5 +34,12 @@ MIN_SEEKER_AGE = 16
 MAX_SEEKER_AGE = 30
 
 
-def valid_location(province, district):
-    return province in LOCATIONS and district in LOCATIONS[province]
+# Used when an advert names the province (for example "Kigali") but not the district.
+# Only opportunities can use it; a seeker always chooses their real district.
+NOT_STATED = "Not stated"
+
+
+def valid_location(province, district, allow_not_stated=False):
+    if province not in LOCATIONS:
+        return False
+    return district in LOCATIONS[province] or (allow_not_stated and district == NOT_STATED)

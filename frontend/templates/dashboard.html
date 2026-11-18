@@ -35,7 +35,8 @@
 
   {% if elsewhere %}
     <h2>Outside your district</h2>
-    <p>These are in other districts. They match you too, but you may need to travel.</p>
+    <p>These are in other districts, or the advert did not name the district. They match you too, but you may
+       need to travel.</p>
     {% for m in elsewhere %}{{ card(m, saved, request.full_path) }}{% endfor %}
   {% endif %}
 {% endif %}
