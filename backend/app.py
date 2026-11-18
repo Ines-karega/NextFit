@@ -211,7 +211,6 @@ def logout():
 
 @app.route("/forgot", methods=["GET", "POST"])
 def forgot():
-    link = None
     if request.method == "POST":
         email = request.form["email"].strip().lower()
         found = db.get_user_by_email(email)
@@ -221,16 +220,16 @@ def forgot():
             db.add_reset_token(token, found["id"], expires)
             reset_link = url_for("reset", token=token, _external=True)
             sent = emailer.send_reset_email(email, reset_link)
-            if not sent and not emailer.email_is_set_up():
-                link = reset_link  # demo mode: no email service set up, so show the link here
+            # On a copy running on a developer's own computer with no email set up, the link is printed in
+            # the terminal (never on the page), so the developer can still test the reset. The live site
+            # never does this: there, only the owner of the email address receives the link (FR1.3).
+            if not sent and not emailer.email_is_set_up() and not db.ON_LIVE_SITE:
+                print("Email is not set up on this computer. Password reset link:", reset_link)
         # The same message is shown whether or not the account exists, so nobody can
         # use this page to find out who has an account (NFR9).
-        if emailer.email_is_set_up():
-            flash("If that email has an account, we have sent a reset link to it. "
-                  "Please check your inbox, and your spam folder too.", "info")
-        else:
-            flash("If that email has an account, a reset link is ready below.", "info")
-    return render_template("forgot.html", link=link)
+        flash("If that email has an account, we have sent a reset link to it. "
+              "Please check your inbox, and your spam folder too.", "info")
+    return render_template("forgot.html")
 
 
 @app.route("/reset/<token>", methods=["GET", "POST"])

@@ -7,10 +7,4 @@
   <input id="email" name="email" type="email">
   <p><button>Get reset link</button></p>
 </form>
-{% if link %}
-  <div class="card">
-    <p><strong>Demo mode:</strong> email sending is not set up on this server, so the link is shown here.</p>
-    <p><a href="{{ link }}">{{ link }}</a></p>
-  </div>
-{% endif %}
 {% endblock %}

@@ -109,7 +109,15 @@ class Journeys(unittest.TestCase):
         finally:
             emailer.email_is_set_up, emailer.send_reset_email = original
 
+    def test_reset_link_is_never_shown_on_the_page(self):
+        self.new_seeker("nolink@example.com")
+        page = nextfit.app.test_client().post("/forgot", data={"email": "nolink@example.com"}).get_data(as_text=True)
+        self.assertNotIn("/reset/", page)
+        self.assertIn("If that email has an account, we have sent a reset link", page)
 
+    def test_reset_page_gives_the_same_answer_for_unknown_emails(self):
+        page = nextfit.app.test_client().post("/forgot", data={"email": "nobody@example.com"}).get_data(as_text=True)
+        self.assertIn("If that email has an account, we have sent a reset link", page)
 
     # ---------- FR2: profile ----------
     def test_profile_refuses_an_age_outside_16_to_30(self):
