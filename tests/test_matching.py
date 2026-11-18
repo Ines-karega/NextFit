@@ -62,6 +62,28 @@ class TheThreeRules(unittest.TestCase):
         self.assertTrue(matching.check(SEEKER, far_away)["eligible"])
 
 
+class SkillWording(unittest.TestCase):
+    """Skills match when all the words of one appear in the other; capital letters never matter."""
+
+    def test_extra_word_still_matches(self):
+        self.assertTrue(matching.same_skill("Excel", "MS Excel"))
+        self.assertTrue(matching.same_skill("MS Excel", "excel"))
+
+    def test_longer_phrase_matches(self):
+        self.assertTrue(matching.same_skill("Customer service", "Excellent customer service"))
+
+    def test_different_second_word_does_not_match(self):
+        self.assertFalse(matching.same_skill("Data entry", "Data analysis"))
+
+    def test_part_of_a_word_does_not_match(self):
+        self.assertFalse(matching.same_skill("Java", "JavaScript"))
+
+    def test_seeker_with_ms_excel_matches_an_excel_opportunity(self):
+        result = matching.check(dict(SEEKER, skills="MS Excel"), opportunity(required_skills="Excel"))
+        self.assertTrue(result["eligible"])
+        self.assertEqual(result["skill_match"], "FULL")
+
+
 class SkillMatchAndExplanation(unittest.TestCase):
     """FR4.3 and FR4.4: full or partial skill match, and the 'why' sentences."""
 
