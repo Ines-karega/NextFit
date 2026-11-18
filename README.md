@@ -1,180 +1,291 @@
 # NextFit
 
-A web platform that helps Rwandan youth (16-30) find the trainings, internships and jobs they already qualify for.
-It matches a seeker's **age, education level and skills** against each opportunity's eligibility rules, shows the
-**closest deadlines first**, puts opportunities in the seeker's **own district first**, and **explains why** each one matched.
+NextFit is a website that helps young Rwandans (aged 16 to 30) find the trainings, internships and jobs they
+already qualify for. A seeker fills in a short profile, and NextFit shows a personal list of opportunities that
+match their age, education level and skills, with the closest deadlines first, opportunities in their own
+district first, and a clear explanation of why each one matched.
 
-Built from the NextFit Software Requirements Specification (SRS). Tools: Python, Flask, SQLite, HTML, CSS, JavaScript.
-On the live site the same code stores its data in PostgreSQL (see "Put it online" below).
+## Links
 
-- **Live site:** _add your public URL here after deploying_
-- **Demo video:** _add link_
-- **SRS:** _add link_
+| What | Link |
+|------|------|
+| Live website | https://nextfit.karega.tech |
+| Demo video | _add link_ |
+| Code | https://github.com/Ines-karega/NextFit |
 
-## What you can do
+## Contents
 
-**Seeker:** sign up, log in, reset a forgotten password, fill in and edit a profile, see personal matches with
-explanations (full/partial skill match, days left), search and filter matches, browse all open opportunities, save and
-remove opportunities, see in-app reminders when a saved deadline is 14 days away or less.
+1. [What NextFit does](#1-what-nextfit-does)
+2. [How the matching works](#2-how-the-matching-works)
+3. [Use the live website, step by step](#3-use-the-live-website-step-by-step)
+4. [Run NextFit on your own computer, step by step](#4-run-nextfit-on-your-own-computer-step-by-step)
+5. [Run the automated tests](#5-run-the-automated-tests)
+6. [Where each SRS requirement is in the app](#6-where-each-srs-requirement-is-in-the-app)
+7. [How the live website is hosted](#7-how-the-live-website-is-hosted)
+8. [Password reset emails](#8-password-reset-emails)
+9. [Troubleshooting](#9-troubleshooting)
+10. [Project files](#10-project-files)
+11. [Scope and design choices](#11-scope-and-design-choices)
+12. [Planned for later](#12-planned-for-later)
 
-**Admin:** add, edit, close and remove opportunities (with age range, accepted education levels and required skills),
-view and remove user accounts, create other admin accounts.
+---
 
-## Run it on your computer (every step)
+## 1. What NextFit does
 
-You need **Python 3.10 or newer**. Download it from https://www.python.org/downloads/ and, in the installer,
-tick **"Add python.exe to PATH"**.
+The problem. Many trainings, internships and youth employment programmes already exist in Rwanda, but young
+people often hear about them too late, or have to search long lists and guess which ones they qualify for.
 
-1. Download the code and open a terminal in the project folder:
+The solution. NextFit does the checking for them. There are two kinds of users:
+
+| User | What they can do |
+|------|------------------|
+| Seeker | Sign up, fill in a profile, see their matches with the reasons, search and filter them, browse every open opportunity, save opportunities, get a reminder when a saved deadline is close, and reset a forgotten password. |
+| Admin | Add, edit, close and remove opportunities, see who added each one, view and remove user accounts, and create other admin accounts. Admins cannot sign up on the website: only an existing admin can create another. |
+
+Built with: Python and Flask for the server, HTML, CSS and JavaScript for the pages, and SQL for the data
+(SQLite on your own computer, PostgreSQL on the live website).
+
+## 2. How the matching works
+
+An opportunity appears in a seeker's My matches list only when all three of these are true:
+
+1. Age: the seeker's age is inside the opportunity's age range.
+2. Education: the seeker's education level is one the opportunity accepts.
+3. Skills: the seeker has at least one of the required skills, or the opportunity needs none.
+
+Then:
+
+- Expired or closed opportunities are never shown to seekers.
+- Matches in the seeker's own district come first, then other districts. District never hides a match.
+- Inside each group, the closest deadline comes first, and each card shows how many days are left.
+- Each card explains why it matched: the age and education rules met, the skills the seeker has, and the
+  skills they are missing. It is labelled a Full skill match (has every required skill) or a
+  Partial skill match (has some).
+
+Skills are typed with a comma between each one, for example `Excel, Accounting, Customer service`.
+
+## 3. Use the live website, step by step
+
+Open https://nextfit.karega.tech. It works on a computer and on a phone (on a phone, tap Menu at the top).
+
+Who can use what on the live website:
+
+- Anyone can use it as a seeker: just sign up with your own email (step 1 below). No demo account is needed.
+- The admin pages are only for the website's admins, because an admin can change the listings. Admin accounts
+  for the live website are given privately to the people who need them. To try the admin side yourself, run
+  NextFit on your own computer (section 4), which comes with a demo admin account.
+
+### As a seeker
+
+1. Press Create my free profile, then enter your name, email and a password (at least 8 characters, with at
+   least one letter and one number).
+2. Fill in your profile: age, province, district, education level, your current situation and your skills.
+   Press Save profile.
+3. My matches opens. Read why each opportunity matched, the days left, and whether it is in your district.
+4. Use the search box and the type, province and district filters to narrow the list.
+5. Press Read the full advert to see the employer's original advert, and Apply (or
+   Copy email address when the opportunity is applied for by email).
+6. Press Save to keep an opportunity in Saved. When its deadline is 14 days away or less, a
+   deadline reminder appears on your pages.
+7. Open Browse all to see every open opportunity, including ones you do not fully qualify for, with what is
+   missing.
+8. Change your details any time in Profile; your matches update straight away.
+9. Forgot your password? On the Log in page, press Forgot your password? and enter your email. A reset
+   link arrives by email (check spam too) and works for 1 hour.
+
+### As an admin
+
+1. Log in with an admin account. The menu shows Opportunities and Users.
+2. Add an opportunity: open Opportunities, press Add opportunity, and fill in the details, including
+   who it is for (age range, accepted education levels and required skills) and, if the opportunity is applied for
+   by email or phone, a link to the full advert. Press Save. It reaches every seeker who qualifies.
+3. Keep the list up to date: the list shows who added each opportunity. Listings whose deadline has passed are
+   marked Deadline passed (seekers no longer see them). Use Edit, Close or Remove on any row.
+4. Manage users: open Users to see every account and remove one, or to create another admin.
+
+To test password reset yourself: sign up as a seeker with your own email address, then use
+Forgot your password? on the login page.
+
+## 4. Run NextFit on your own computer, step by step
+
+Requirements: Python 3.10 or newer, and Git.
+
+1. Clone the repository:
    ```
    git clone https://github.com/Ines-karega/NextFit.git
    cd NextFit
    ```
-2. Create a virtual environment (a private box for this project's libraries):
+2. Create and activate a virtual environment:
+
+   Windows (PowerShell):
    ```
    python -m venv venv
+   venv\Scripts\Activate.ps1
    ```
-3. Turn it on.
-   - Windows (PowerShell): `venv\Scripts\Activate.ps1`
-   - Windows (Command Prompt): `venv\Scripts\activate.bat`
-   - Mac / Linux: `source venv/bin/activate`
+   If script execution is blocked, run `Set-ExecutionPolicy -Scope Process Bypass` first.
 
-   (If PowerShell blocks it, run `Set-ExecutionPolicy -Scope Process Bypass` first, then try again.)
-4. Install the libraries:
+   Mac or Linux:
+   ```
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. Install the dependencies:
    ```
    pip install -r requirements.txt
    ```
-5. Start the website:
+4. Start the server:
    ```
    python backend/app.py
    ```
-6. Open http://127.0.0.1:5000 in your browser.
-7. To stop the website, go back to the terminal and press **Ctrl + C**.
+5. Open http://127.0.0.1:5000 in your browser and use the website. Keep the terminal open while you do.
+6. When you have finished, stop the server by pressing Ctrl + C in the terminal.
 
-The database file `nextfit.db` is created automatically the first time. It is filled with the real listings in
-`backend/real_opportunities.csv` when that file has rows, and with 22 sample opportunities when it does not.
-To start fresh, stop the server, delete `nextfit.db`, and start again.
+No configuration is needed. On first start, NextFit creates a SQLite database (`nextfit.db`), a demo admin, a
+demo seeker, and loads the listings from `backend/real_opportunities.csv`.
 
-## Demo accounts
+To run NextFit again later, you don't need to repeat every step. Open a terminal in the `NextFit` folder,
+activate the virtual environment (the second line of step 2), then start the server (step 4).
 
-| Role | Email | Password |
-|------|-------|----------|
-| Seeker (profile already filled in) | seeker@nextfit.rw | Seeker123! |
-| Admin | admin@nextfit.rw | Admin123! |
+### Demo accounts on your computer
 
-Or click **Sign up** to make your own seeker account. Admins cannot sign up publicly (SRS FR1.1): the first admin is
-created by the program on first start, and only an admin can create more.
+These accounts work only on a copy running on your own computer. They do not work on the live website.
+On the live website, sign up as a seeker with your own email instead (see section 3).
 
-These two demo accounts and the sample listings only exist on your own computer. The live site never creates them.
+| Role | Email | Password | What to try |
+|------|-------|----------|-------------|
+| Seeker | `seeker@nextfit.rw` | `Seeker123!` | My matches, the reasons, search, saving and reminders |
+| Admin | `admin@nextfit.rw` | `Admin123!` | Adding, editing and closing opportunities, and Users |
 
-## Put it online (free): Vercel + Neon + Brevo
+You can also press Sign up to make your own seeker account.
 
-Free hosting does not keep local files, so a SQLite file would lose its data there.
-On the live site NextFit therefore keeps its data in a free PostgreSQL database. Nothing in the code needs
-changing: when the `DATABASE_URL` setting exists, PostgreSQL is used; when it does not, SQLite is used.
+### Try a whole journey
 
-1. **Database (Neon).** Create a free account at neon.com and a project in the **Frankfurt** region.
-   Copy the **pooled connection string** (it starts with `postgresql://`).
-2. **Email (Brevo).** Follow "On the live site: Brevo" in the next section to get an API key.
-3. **Website (Vercel).** Put the code on GitHub. Create a free account at vercel.com, choose
-   **Add New > Project** and import the repository. Vercel finds the Flask app through `wsgi.py`.
-   Before pressing **Deploy**, open **Environment Variables** and add:
+1. Log in as the admin and add an opportunity in Kigali City, Gasabo (the demo seeker's district), for
+   Bachelor's graduates aged 18 to 30 needing `Excel`.
+2. Log out and log in as the seeker (or sign up a new one with Bachelor's and `Excel`).
+3. Open My matches: the new opportunity is there, with the reasons it matched.
+4. Press Save, then open Saved. If the deadline is 14 days away or less, you see a deadline reminder.
 
-   | Name | Value |
-   |------|-------|
-   | `DATABASE_URL` | the connection string from Neon |
-   | `SECRET_KEY` | a long random text that keeps logins safe. Make one with `python -c "import secrets; print(secrets.token_hex(32))"` |
-   | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | the first admin account. Choose a strong password. |
-   | `ADMIN_NAME` | optional, the first admin's name, shown as "Added by" on the starting listings (default `NextFit Admin`) |
-   | `BREVO_API_KEY` / `EMAIL_FROM` | from step 2, e.g. `noreply@karega.tech` |
+Password reset on your computer: no email is sent. After Forgot your password?, the reset link is printed in
+the terminal where the server is running, so you can still try it (see section 8).
 
-   The site refuses to start without `DATABASE_URL`, `SECRET_KEY` and `ADMIN_PASSWORD`, so there is never a
-   live admin with a known password. If a deploy fails, the reason is in the project's **Logs** tab.
-4. **Keep the website next to the database.** In the Vercel project open **Settings > Functions** and set the
-   **Function Region** to **Frankfurt (fra1)**, then deploy again. With both in Frankfurt, pages load faster.
-5. **Your own address.** In the Vercel project open **Settings > Domains**, add `nextfit.karega.tech`,
-   and create the CNAME record it shows in your domain's DNS settings. Vercel adds HTTPS by itself.
+To start again with a fresh database: stop the website, delete `nextfit.db`, and start it again.
 
-Vercel starts the site whenever someone visits, so it never needs to be kept awake.
-Open `https://nextfit.karega.tech/health` at any time: it answers `ok` when the site is running.
+## 5. Run the automated tests
 
-On first start the live site creates the tables, the first admin, and loads the real listings from
-`backend/real_opportunities.csv`. After that, the admin adds and edits opportunities on the website.
+The tests check the matching rules and walk through the main pages: sign up, login, password reset, profile,
+matches, search, browse, saving, reminders and the admin pages. They use a temporary practice database, so your
+own `nextfit.db` and the live website are never touched, and no emails are sent.
 
-## Turn on password reset emails (optional on your computer, needed on the live site)
+With the virtual environment activated, from the project folder, run:
+```
+python -m unittest discover tests
+```
+The last line should say `OK`.
 
-NextFit can send the email in two ways. If both are set up, Brevo is used.
+## 6. Where each SRS requirement is in the app
 
-### On the live site: Brevo (free, 300 emails a day, reaches any email address)
+| SRS requirement | Where to find it |
+|-----------------|------------------|
+| FR 1.1 Sign up | Create my free profile on the home page |
+| FR 1.2 Log in | Log in in the menu |
+| FR 1.3 Reset password | Log in, then Forgot your password? |
+| FR 2.1, 2.2 Create and edit profile | Profile in the menu |
+| FR 3.1 Add opportunity | Admin: Opportunities, then Add opportunity |
+| FR 3.2, 3.3 Edit and close opportunity | Admin: Edit and Close on each row of Opportunities |
+| FR 4.1 to 4.4 Matching, explanation, full or partial skill match | My matches: each card's "Why this matched you" |
+| FR 4.2 Hide expired opportunities | Automatic; the admin's list marks them Deadline passed |
+| FR 5.1 to 5.3 Deadline order, days left, own district first | My matches |
+| FR 6.1 to 6.3 Search and filters | The search box and filters on My matches |
+| FR 7.1, 7.2 Save and remove | Save on a card, and Saved in the menu |
+| FR 8.1 Deadline reminder | On My matches, Saved and the home page |
+| FR 9.1 Browse all | Browse all in the menu |
+| FR 10.1 Manage users | Admin: Users |
+| FR 10.2 Manage opportunities | Admin: Opportunities (edit, close, remove) |
+| NFR 1 Safety reminder | The "Stay safe" note on every opportunity |
+| NFR 2 Security | Passwords are stored scrambled (hashed), the live site uses HTTPS, and each role only sees its own pages |
+| NFR 4 Phone friendly | The Menu button on phones; no page needs sideways scrolling |
+| NFR 5 Clear messages | Messages under each field, friendly error pages, and "No matches yet" with a link to Browse all |
+| NFR 9 Privacy | The profile page explains why each detail is asked for |
 
-Brevo sends over normal HTTPS, so it also works on hosts that block the usual email ports.
+## 7. How the live website is hosted
 
-1. Create a free account at brevo.com.
-2. In Brevo, add and verify your domain (**Senders, Domains & Dedicated IPs > Domains**) by copying the DNS records
-   it shows into your domain's DNS settings. This lets you send from an address such as `noreply@karega.tech`
-   and keeps the emails out of spam folders.
-3. Create an API key (**SMTP & API > API Keys**).
-4. On the hosting site, add these under **Environment variables** (never write them inside the code):
+The live website is already set up and running at https://nextfit.karega.tech. You don't need to do anything to
+use it. For reference, it uses three free services:
 
-   | Name | Value |
-   |------|-------|
-   | `BREVO_API_KEY` | the API key from step 3 |
-   | `EMAIL_FROM` | the sending address on your domain, e.g. `noreply@karega.tech` |
-   | `EMAIL_FROM_NAME` | optional, the sender name people see (default `NextFit`) |
+| Service | What it does for NextFit |
+|---------|--------------------------|
+| Vercel | Runs the website. Every change merged into the `main` branch on GitHub goes live automatically. |
+| Neon | Stores the live data in a PostgreSQL database. Free hosting does not keep files, so the live website cannot use `nextfit.db`; the same code uses PostgreSQL when the `DATABASE_URL` setting exists. |
+| Brevo | Sends the password reset emails from `noreply@karega.tech`. |
 
-5. If emails are refused, check **Security > Authorised IPs** in Brevo: it can block requests from servers it does
-   not know. The reason for any failure is printed in the hosting site's logs.
+Private settings such as the database address and the email key are stored in Vercel, never in the code.
 
-### On your computer: a Gmail account (SMTP)
+## 8. Password reset emails
 
-1. In your Google account turn on **2-Step Verification**, then create an **App password**
-   (Google Account > Security > App passwords). Copy the 16-letter password.
-2. Set these four settings before starting the site (never write them inside the code or upload them to GitHub).
+On the live website, when someone presses Forgot your password?, NextFit emails them a link to choose a new
+password. The link works for 1 hour.
 
-   Windows PowerShell:
-   ```
-   $env:SMTP_HOST = "smtp.gmail.com"
-   $env:SMTP_PORT = "587"
-   $env:SMTP_USER = "your.address@gmail.com"
-   $env:SMTP_PASSWORD = "your-16-letter-app-password"
-   python backend/app.py
-   ```
-   Mac / Linux: use `export SMTP_HOST=smtp.gmail.com` and so on.
-3. Open **Log in > Forgot your password?**, type an account's email, and check that inbox.
+On a copy running on your own computer, no email is sent. Instead, the link is printed in the terminal where the
+server is running, so a developer can still try the whole reset. The link is never shown on the website itself,
+so on the live website only the owner of the email address can reset the password.
 
-## Important notes
+## 9. Troubleshooting
 
-- The 22 sample opportunities are **sample data** (links go to example.org). Their deadlines are set relative to today so the
-  demo always has open opportunities. One has an expired deadline on purpose, to show that expired ones stay hidden.
-- **Forgot password:** the reset link is **emailed** to the user and works for 1 hour. This needs the email settings
-  described above. If they are not set (for example when you just run it on your computer), the link is shown on the screen
-  instead ("demo mode") so you can still try it.
-- Before going live, set a private `SECRET_KEY`, and `ADMIN_EMAIL` / `ADMIN_PASSWORD` for the first admin.
-  Set `NEXTFIT_SEED=0` to skip the sample data.
+| Problem | What to do |
+|---------|------------|
+| Windows refuses to turn on the virtual environment (a red message about running scripts) | Run `Set-ExecutionPolicy -Scope Process Bypass`, then activate it again (step 2) |
+| `python` is not recognised | Use `py` (Windows) or `python3` (Mac or Linux), or reinstall Python with "Add python.exe to PATH" ticked |
+| The browser says "This site can't be reached" on 127.0.0.1:5000 | The server is not running: start it again (step 4) and keep the terminal open |
+| The page looks old after an update | Press Ctrl + F5 to reload it fully |
+| "This email already has an account" | Log in instead, or use Forgot your password? |
+| The reset email did not arrive | Check the spam folder. On your own computer no email is sent: the link is printed in the terminal instead |
+| You want to start again | Stop the website, delete `nextfit.db`, and start it again |
 
-## Files
+## 10. Project files
 
-**`backend/`** (Python, runs on the server)
+```
+NextFit/
+  backend/                  Python code that runs on the server
+    app.py                  All the pages: sign up, log in, profile, matches, saved, admin
+    matching.py             The three matching rules and the "why this matched you" explanation
+    db.py                   The only file that talks to the database (SQLite or PostgreSQL)
+    emailer.py              Sends the password reset email
+    seed.py                 Loads the starting listings and, on your computer, the demo accounts
+    rwanda.py               Provinces, districts, education levels and other fixed lists
+    real_opportunities.csv  The starting list of real opportunities, with the source of each one
+  frontend/
+    templates/              The HTML pages
+    static/style.css        The look of the website
+    static/app.js           The district list, the phone Menu button, Show password and Copy email address
+  tests/
+    test_matching.py        Tests for the matching rules
+    test_journeys.py        Tests that walk through the main pages
+  requirements.txt          The libraries to install
+  wsgi.py                   The starting point Vercel uses for the live website
+```
 
-| File | What it does |
-|------|--------------|
-| `app.py` | All the pages (routes): sign up, log in, profile, dashboard, saved, admin |
-| `matching.py` | The matching rules and the "why you matched" explanation |
-| `db.py` | The only file that talks to the database: creates the tables and the first admin, and reads and saves everything |
-| `emailer.py` | Sends the password reset email |
-| `seed.py` | Loads the real listings from `real_opportunities.csv`, or the sample opportunities and demo seeker |
-| `rwanda.py` | Provinces, districts and fixed lists (education levels, types) |
+## 11. Scope and design choices
 
-**`frontend/`** (what the user sees in the browser)
+- Matching uses three rules. Only age, education and skills decide whether an opportunity is shown, as set in
+  the SRS (FR 4.1). District changes the order but never hides a match. When an advert also asks for years of
+  experience, its description says so, and the employer judges it.
+- Skills are compared by their words. Capital letters never matter, and a skill counts as the same when all its
+  words appear in the other one: "Excel" matches "MS Excel", and "Customer service" matches "Excellent customer
+  service". Seekers write their own skills, and the employer checks them during their own application process.
+- Admins add every opportunity. As set in the SRS for this version (section 2.5), listings are entered by an
+  admin from real adverts, each with a link to the original. When an advert names the province but not the
+  district (for example it only says "Kigali"), the listing says "district not stated". It is still shown to
+  everyone it matches, but never as being in a seeker's own district.
+- Expired opportunities are hidden automatically. Seekers never see an opportunity after its deadline (FR 4.2).
+  In the admin's list it is marked Deadline passed, so an admin can close or remove it (FR 3.3).
+- Emails are checked for a complete format (for example `name@gmail.com`). NextFit does not send a confirmation
+  email at sign-up, so it cannot know whether a correctly written address really exists. Password reset links
+  only ever go to the registered address, so an account can only be recovered by whoever owns that inbox.
+  Capital letters in an email address don't matter: NextFit saves and compares addresses in lowercase.
+- The website is in English, as set in the SRS (section 2.5).
 
-| Folder | What it has |
-|--------|-------------|
-| `templates/` | The HTML pages |
-| `static/` | `style.css` (the look) and `app.js` (fills the district list) |
+## 12. Planned for later
 
-Other files in the main folder: `requirements.txt` (libraries to install), `wsgi.py` (the starting point Vercel uses
-for the live site), `nextfit.db` (created automatically on your computer).
-
-## Not in this prototype (planned for later, as in the SRS)
-
-Mobile app, SMS reminders, automatic collection of opportunities from other sites.
+As listed in the SRS: a mobile app, SMS reminders, and collecting opportunities automatically from partner
+websites.
