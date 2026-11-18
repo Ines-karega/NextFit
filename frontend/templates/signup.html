@@ -11,7 +11,7 @@
   <input id="email" name="email" type="email" value="{{ form.get('email', '') }}">
   {% if errors.email %}<p class="error">{{ errors.email }}</p>{% endif %}
 
-  <label for="password">Password (at least 8 characters)</label>
+  <label for="password">Password (at least 8 characters, with at least one letter and one number)</label>
   <input id="password" name="password" type="password">
   {% if errors.password %}<p class="error">{{ errors.password }}</p>{% endif %}
 

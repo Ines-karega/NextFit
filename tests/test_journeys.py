@@ -74,7 +74,18 @@ class Journeys(unittest.TestCase):
         with nextfit.app.app_context():
             self.assertNotEqual(db.get_user_by_email("hash@example.com")["password_hash"], "password1")
 
+    def test_incomplete_email_is_refused_with_a_message(self):
+        for wrong in ["aline", "aline@", "aline@gmail", "aline @gmail.com"]:
+            page = nextfit.app.test_client().post("/signup", data={"name": "A", "email": wrong, "password": "password1"}).get_data(as_text=True)
+            self.assertIn("Please enter a full email address", page, wrong)
 
+    def test_weak_password_is_refused_with_a_message(self):
+        short = nextfit.app.test_client().post("/signup", data={"name": "A", "email": "weak1@example.com", "password": "abc1"}).get_data(as_text=True)
+        self.assertIn("at least 8 characters", short)
+        no_number = nextfit.app.test_client().post("/signup", data={"name": "A", "email": "weak2@example.com", "password": "password"}).get_data(as_text=True)
+        self.assertIn("at least one letter and one number", no_number)
+        with nextfit.app.app_context():
+            self.assertIsNone(db.get_user_by_email("weak2@example.com"))
 
     def test_wrong_password_is_refused(self):
         page = nextfit.app.test_client().post("/login", data={"email": ADMIN_EMAIL, "password": "wrong"}).get_data(as_text=True)
