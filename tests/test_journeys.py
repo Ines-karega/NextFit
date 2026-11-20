@@ -201,6 +201,32 @@ class Journeys(unittest.TestCase):
         with nextfit.app.app_context():
             self.assertEqual(db.get_user_by_email("second@example.com")["role"], "ADMIN")
 
+    def test_full_advert_is_only_offered_for_email_applications(self):
+        self.add_opportunity("Clerk at Link Company", required_skills="Typing",
+                             advert_link="https://example.org/link-advert")
+        self.add_opportunity("Clerk at Email Company", required_skills="Typing", apply_link="jobs@example.org",
+                             advert_link="https://example.org/email-advert")
+        page = self.new_seeker("adverts@example.com", skills="Typing").get("/dashboard").get_data(as_text=True)
+        self.assertNotIn("https://example.org/link-advert", page)   # Apply goes to the employer's page
+        self.assertIn("https://example.org/email-advert", page)
+        self.assertIn("How to apply by email", page)
+
+    def test_organisation_is_read_from_the_listing_title(self):
+        self.assertEqual(nextfit.organisation_of("Teller - Muhabura SACCO Burera"), "Muhabura SACCO Burera")
+        self.assertEqual(nextfit.organisation_of("Sales Assistant at Blackbuck Coffee"), "Blackbuck Coffee")
+        self.assertEqual(nextfit.organisation_of("Free coding course"), "")
+
+    def test_home_page_shows_open_numbers_and_who_offers_them(self):
+        self.add_opportunity("Baker at Umutima Bakery", type="TRAINING")
+        self.add_opportunity("Cook at Old Kitchen", deadline=days_from_today(-1))
+        page = nextfit.app.test_client().get("/").get_data(as_text=True)
+        self.assertIn("Who is offering opportunities right now", page)
+        self.assertIn("Umutima Bakery", page)
+        self.assertNotIn("Old Kitchen", page)   # its deadline has passed
+        seeker_home = self.new_seeker("home@example.com").get("/").get_data(as_text=True)
+        self.assertIn("Who is offering opportunities right now", seeker_home)
+        self.assertIn("Umutima Bakery", seeker_home)
+
 
 if __name__ == "__main__":
     unittest.main()

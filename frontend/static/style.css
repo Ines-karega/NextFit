@@ -89,6 +89,9 @@ input[type=checkbox] { width: auto; }
 .reasons li { padding: 2px 0; }
 .reasons li.yes::before { content: "\2714\00a0\00a0"; color: #15803d; font-weight: bold; }
 .reasons li.no::before { content: "\2716\00a0\00a0"; color: var(--red); font-weight: bold; }
+.how-to-apply { background: var(--green-soft); border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+.how-to-apply ol { margin: 6px 0 0; padding-left: 22px; }
+.how-to-apply li { margin: 3px 0; }
 .safety { font-size: 12.5px; color: #6b5200; background: #fff9e6; padding: 8px 10px; border-radius: 8px; }
 
 /* ---------- search and filters ---------- */
@@ -109,6 +112,35 @@ input[type=checkbox] { width: auto; }
 .step h3 { margin: 6px 0 4px; font-size: 18px; color: var(--green-dark); }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 .promise { background: var(--green-soft); border-radius: 14px; padding: 16px 20px; margin: 18px 0; text-align: center; font-weight: 600; color: var(--green-dark); }
+
+/* ---------- home page banner with a photo ---------- */
+/* Photo by Vitaly Gariev on Unsplash (free to use under the Unsplash License) */
+body { overflow-x: hidden; }
+.hero.photo { width: 100vw; margin: -20px calc(50% - 50vw) 0; border-radius: 0; box-shadow: none; padding: 56px 16px;
+  background: linear-gradient(270deg, rgba(8, 60, 55, 0) 400px, rgba(8, 60, 55, 0.8) 650px, #083c37 900px), url("hero.jpg") right 30% / auto 135% no-repeat #083c37; }
+.hero.photo .inner { max-width: 828px; margin: 0 auto; }
+.hero.photo h1 { max-width: 520px; }
+.hero.photo p { max-width: 470px; }
+@media (max-width: 639px) {
+  .hero.photo { background: linear-gradient(rgba(8, 60, 55, 0.86), rgba(8, 60, 55, 0.86)), url("hero.jpg") 70% center / cover; }
+}
+
+/* ---------- home page: open numbers and who is hiring ---------- */
+.numbers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+.number { background: #fff; border: 1px solid var(--line); border-top: 5px solid var(--green); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+.number.training { border-top-color: #2563eb; }
+.number.internship { border-top-color: #7c3aed; }
+.number.job { border-top-color: #0891b2; }
+.number .icon { font-size: 24px; line-height: 1; }
+.number strong { display: block; font-size: 34px; line-height: 1.15; margin-top: 6px; color: var(--green-dark); }
+.number span { color: var(--muted); font-size: 14px; font-weight: 600; }
+.hint { color: var(--muted); margin-top: -4px; }
+.hiring { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
+.org { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 7px 15px; font-size: 14.5px; font-weight: 600; color: var(--green-dark); box-shadow: var(--shadow); }
+@media (min-width: 640px) {
+  .numbers { grid-template-columns: repeat(4, 1fr); }
+  .numbers.three { grid-template-columns: repeat(3, 1fr); }
+}
 
 /* ---------- tables (admin) ---------- */
 .table-wrap { overflow-x: auto; background: #fff; border-radius: 14px; border: 1px solid var(--line); box-shadow: var(--shadow); }

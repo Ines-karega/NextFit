@@ -127,11 +127,35 @@ def go_back(default_page):
 
 
 # ---------------- public pages ----------------
+def organisation_of(title):
+    """The organisation named in a listing title, such as "Teller - Muhabura SACCO Burera"
+    or "Sales Assistant at Blackbuck Coffee". Returns "" when the title names none."""
+    for marker in (" - ", " at "):
+        if marker in title:
+            return title.rsplit(marker, 1)[1].strip()
+    return ""
+
+
+def open_numbers(open_opps):
+    """What the home page shows about open opportunities: how many of each type,
+    and the organisations that are hiring, in alphabetical order."""
+    counts = {code: 0 for code, _ in OPP_TYPES}
+    organisations = set()
+    for o in open_opps:
+        counts[o["type"]] = counts.get(o["type"], 0) + 1
+        name = organisation_of(o["title"])
+        if name:
+            organisations.add(name)
+    return {"types": [(code, label, counts[code]) for code, label in OPP_TYPES],
+            "organisations": sorted(organisations, key=str.lower)}
+
+
 @app.route("/")
 def home():
     user = current_user()
     if user is None:
-        return render_template("home.html")
+        open_opps = db.get_open_opportunities(date.today().isoformat())
+        return render_template("home.html", numbers=open_numbers(open_opps))
     if user["role"] == "ADMIN":
         counts = db.count_opportunities(date.today().isoformat())   # open, expired, closed
         counts["seekers"] = db.count_seekers()
@@ -139,18 +163,18 @@ def home():
 
     # Seeker home: a short summary of what is waiting for them
     my_profile = db.get_profile(user["id"])
+    open_opps = db.get_open_opportunities(date.today().isoformat())
     match_count = 0
     top_pick = None
     demand = []
     if my_profile is not None:
-        open_opps = db.get_open_opportunities(date.today().isoformat())
         matches = matching.match_all(my_profile, open_opps)
         match_count = len(matches)
         if matches:
             top_pick = matches[0]  # in your district first, then closest deadline
         demand = matching.skills_in_demand(my_profile, open_opps)
     return render_template("home_seeker.html", my_profile=my_profile, match_count=match_count,
-                           top_pick=top_pick, demand=demand,
+                           top_pick=top_pick, demand=demand, numbers=open_numbers(open_opps),
                            saved_count=len(db.get_saved_ids(user["id"])),
                            reminders=get_reminders(user["id"])[:3])
 

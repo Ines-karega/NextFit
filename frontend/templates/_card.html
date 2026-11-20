@@ -36,31 +36,36 @@
     {% endfor %}
   </ul>
 
-  {# FR3.1: the admin gives an application link or a contact (an email address or a phone number) #}
-  {# advert = optional link to the full advert, which says exactly what the employer wants #}
+  {# FR3.1: the admin gives an application link or a contact (an email address or a phone number). #}
+  {# The full advert is only shown when people apply by email or phone, so they can read what to send. #}
   {% set apply = o['apply_link'] | replace('mailto:', '') %}
   {% set advert = o['advert_link'] or '' %}
   {% set is_link = apply.startswith('http://') or apply.startswith('https://') %}
   {% set is_email = not is_link and '@' in apply %}
   {% if is_email %}
-    <p>How to apply: by email to <strong>{{ apply }}</strong></p>
-    {% if advert %}
-      <p><small>Before you write, open the full advert: it says exactly what to send (for example your CV, a cover letter
-      or certificates). Write "{{ o['title'] }}" as the subject of your email.</small></p>
-    {% else %}
-      <p><small>There is no link to the full advert for this opportunity. Send your CV and a short letter saying you are
-      applying for "{{ o['title'] }}", and write that title as the subject of your email.</small></p>
-    {% endif %}
+    <div class="how-to-apply">
+      <strong>How to apply by email</strong>
+      <ol>
+        {% if advert %}
+          <li>Read the full advert. It says which documents to send, and sometimes the subject to write.</li>
+        {% else %}
+          <li>Prepare your CV and a short letter saying which opportunity you are applying for.</li>
+        {% endif %}
+        <li>Copy the email address: <strong>{{ apply }}</strong></li>
+        <li>Send your email.
+          {% if advert %}Use the subject the advert asks for, or "{{ o['title'] }}" if it does not give one.
+          {% else %}Write "{{ o['title'] }}" as the subject.{% endif %}</li>
+      </ol>
+    </div>
   {% elif not is_link %}
     <p>How to apply: <strong>{{ apply }}</strong></p>
-    {% if advert %}<p><small>Open the full advert to see what is needed before you get in touch.</small></p>{% endif %}
+    {% if advert %}<p>Read the full advert first to see what is needed before you get in touch.</p>{% endif %}
   {% endif %}
   <p>
     {% if is_link %}
       <a class="button" href="{{ apply }}" target="_blank" rel="noopener">Apply</a>
-    {% endif %}
-    {% if advert and advert != apply %}
-      <a class="button {{ 'grey' if is_link }}" href="{{ advert }}" target="_blank" rel="noopener">Read the full advert</a>
+    {% elif advert %}
+      <a class="button" href="{{ advert }}" target="_blank" rel="noopener">Read the full advert</a>
     {% endif %}
     {% if is_email %}
       <button type="button" class="grey copy-email" data-email="{{ apply }}">Copy email address</button>

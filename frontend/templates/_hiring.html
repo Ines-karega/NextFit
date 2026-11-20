@@ -1,0 +1,8 @@
+{# The organisations with open listings right now. Needs numbers from open_numbers() in app.py. #}
+{% if numbers['organisations'] %}
+  <h2>Who is offering opportunities right now</h2>
+  <p class="hint">Trainings, internships and jobs from organisations across Rwanda, added by the NextFit team.</p>
+  <div class="hiring">
+    {% for name in numbers['organisations'] %}<span class="org">{{ name }}</span>{% endfor %}
+  </div>
+{% endif %}

@@ -39,7 +39,7 @@
   <input id="apply_link" name="apply_link" value="{{ o['apply_link'] or '' }}">
   {% if errors.apply_link %}<p class="error">{{ errors.apply_link }}</p>{% endif %}
 
-  <label for="advert_link">Link to the full advert (optional, but needed when people apply by email or phone)</label>
+  <label for="advert_link">Link to the full advert (only shown when people apply by email or phone, so they can read what to send)</label>
   <input id="advert_link" name="advert_link" placeholder="https://" value="{{ o['advert_link'] or '' }}">
   {% if errors.advert_link %}<p class="error">{{ errors.advert_link }}</p>{% endif %}
 
