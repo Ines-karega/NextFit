@@ -1,0 +1,18 @@
+{# Open opportunities by type, and the organisations offering them. Needs numbers from open_numbers() in app.py. #}
+{% set icons = {'TRAINING': '&#127891;', 'INTERNSHIP': '&#128203;', 'JOB': '&#128188;'} %}
+<div class="numbers{{ ' three' if not numbers['organisations'] }}">
+  {% for code, label, count in numbers['types'] %}
+    <div class="number {{ code | lower }}">
+      <div class="icon">{{ icons[code] | safe }}</div>
+      <strong>{{ count }}</strong>
+      <span>{{ label }}{{ 's' if count != 1 }} open</span>
+    </div>
+  {% endfor %}
+  {% if numbers['organisations'] %}
+    <div class="number organisations">
+      <div class="icon">&#127970;</div>
+      <strong>{{ numbers['organisations'] | length }}</strong>
+      <span>Organisation{{ 's' if numbers['organisations'] | length != 1 }}</span>
+    </div>
+  {% endif %}
+</div>

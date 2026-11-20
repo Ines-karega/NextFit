@@ -110,6 +110,23 @@ input[type=checkbox] { width: auto; }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 .promise { background: var(--green-soft); border-radius: 14px; padding: 16px 20px; margin: 18px 0; text-align: center; font-weight: 600; color: var(--green-dark); }
 
+/* ---------- home page: open numbers and who is hiring ---------- */
+.numbers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+.number { background: #fff; border: 1px solid var(--line); border-top: 5px solid var(--green); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
+.number.training { border-top-color: #2563eb; }
+.number.internship { border-top-color: #7c3aed; }
+.number.job { border-top-color: #0891b2; }
+.number .icon { font-size: 24px; line-height: 1; }
+.number strong { display: block; font-size: 34px; line-height: 1.15; margin-top: 6px; color: var(--green-dark); }
+.number span { color: var(--muted); font-size: 14px; font-weight: 600; }
+.hint { color: var(--muted); margin-top: -4px; }
+.hiring { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 8px; }
+.org { background: #fff; border: 1px solid var(--line); border-radius: 22px; padding: 7px 15px; font-size: 14.5px; font-weight: 600; color: var(--green-dark); box-shadow: var(--shadow); }
+@media (min-width: 640px) {
+  .numbers { grid-template-columns: repeat(4, 1fr); }
+  .numbers.three { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ---------- tables (admin) ---------- */
 .table-wrap { overflow-x: auto; background: #fff; border-radius: 14px; border: 1px solid var(--line); box-shadow: var(--shadow); }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
