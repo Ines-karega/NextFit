@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-<div class="hero">
-  <h1>Find the opportunities you already qualify for</h1>
-  <p>Trainings, internships and jobs in Rwanda, matched to your age, education and skills. The closest deadlines come first, and we show you why each one fits.</p>
-  <div class="actions">
-    <a class="button big" href="{{ url_for('signup') }}">Create my free profile</a>
-    <a class="button grey big" href="{{ url_for('login') }}">Log in</a>
+<div class="hero photo">
+  <div class="inner">
+    <h1>Find the opportunities you already qualify for</h1>
+    <p>Trainings, internships and jobs in Rwanda, matched to your age, education and skills. The closest deadlines come first, and we show you why each one fits.</p>
+    <div class="actions">
+      <a class="button big" href="{{ url_for('signup') }}">Create my free profile</a>
+      <a class="button grey big" href="{{ url_for('login') }}">Log in</a>
+    </div>
   </div>
 </div>
 

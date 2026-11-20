@@ -110,6 +110,18 @@ input[type=checkbox] { width: auto; }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 .promise { background: var(--green-soft); border-radius: 14px; padding: 16px 20px; margin: 18px 0; text-align: center; font-weight: 600; color: var(--green-dark); }
 
+/* ---------- home page banner with a photo ---------- */
+/* Photo by Vitaly Gariev on Unsplash (free to use under the Unsplash License) */
+body { overflow-x: hidden; }
+.hero.photo { width: 100vw; margin: -20px calc(50% - 50vw) 0; border-radius: 0; box-shadow: none; padding: 56px 16px;
+  background: linear-gradient(270deg, rgba(8, 60, 55, 0) 400px, rgba(8, 60, 55, 0.8) 650px, #083c37 900px), url("hero.jpg") right 30% / auto 135% no-repeat #083c37; }
+.hero.photo .inner { max-width: 828px; margin: 0 auto; }
+.hero.photo h1 { max-width: 520px; }
+.hero.photo p { max-width: 470px; }
+@media (max-width: 639px) {
+  .hero.photo { background: linear-gradient(rgba(8, 60, 55, 0.86), rgba(8, 60, 55, 0.86)), url("hero.jpg") 70% center / cover; }
+}
+
 /* ---------- home page: open numbers and who is hiring ---------- */
 .numbers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
 .number { background: #fff; border: 1px solid var(--line); border-top: 5px solid var(--green); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow); }
