@@ -163,18 +163,18 @@ def home():
 
     # Seeker home: a short summary of what is waiting for them
     my_profile = db.get_profile(user["id"])
+    open_opps = db.get_open_opportunities(date.today().isoformat())
     match_count = 0
     top_pick = None
     demand = []
     if my_profile is not None:
-        open_opps = db.get_open_opportunities(date.today().isoformat())
         matches = matching.match_all(my_profile, open_opps)
         match_count = len(matches)
         if matches:
             top_pick = matches[0]  # in your district first, then closest deadline
         demand = matching.skills_in_demand(my_profile, open_opps)
     return render_template("home_seeker.html", my_profile=my_profile, match_count=match_count,
-                           top_pick=top_pick, demand=demand,
+                           top_pick=top_pick, demand=demand, numbers=open_numbers(open_opps),
                            saved_count=len(db.get_saved_ids(user["id"])),
                            reminders=get_reminders(user["id"])[:3])
 

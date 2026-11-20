@@ -213,6 +213,9 @@ class Journeys(unittest.TestCase):
         self.assertIn("Who is offering opportunities right now", page)
         self.assertIn("Umutima Bakery", page)
         self.assertNotIn("Old Kitchen", page)   # its deadline has passed
+        seeker_home = self.new_seeker("home@example.com").get("/").get_data(as_text=True)
+        self.assertIn("Who is offering opportunities right now", seeker_home)
+        self.assertIn("Umutima Bakery", seeker_home)
 
 
 if __name__ == "__main__":
