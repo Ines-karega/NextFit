@@ -201,6 +201,16 @@ class Journeys(unittest.TestCase):
         with nextfit.app.app_context():
             self.assertEqual(db.get_user_by_email("second@example.com")["role"], "ADMIN")
 
+    def test_full_advert_is_only_offered_for_email_applications(self):
+        self.add_opportunity("Clerk at Link Company", required_skills="Typing",
+                             advert_link="https://example.org/link-advert")
+        self.add_opportunity("Clerk at Email Company", required_skills="Typing", apply_link="jobs@example.org",
+                             advert_link="https://example.org/email-advert")
+        page = self.new_seeker("adverts@example.com", skills="Typing").get("/dashboard").get_data(as_text=True)
+        self.assertNotIn("https://example.org/link-advert", page)   # Apply goes to the employer's page
+        self.assertIn("https://example.org/email-advert", page)
+        self.assertIn("How to apply by email", page)
+
     def test_organisation_is_read_from_the_listing_title(self):
         self.assertEqual(nextfit.organisation_of("Teller - Muhabura SACCO Burera"), "Muhabura SACCO Burera")
         self.assertEqual(nextfit.organisation_of("Sales Assistant at Blackbuck Coffee"), "Blackbuck Coffee")
