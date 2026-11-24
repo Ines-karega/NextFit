@@ -10,8 +10,8 @@ district first, and a clear explanation of why each one matched.
 | What | Link |
 |------|------|
 | Live website | https://nextfit.karega.tech |
-| Demo video | _add link_ |
-| Code | https://github.com/Ines-karega/NextFit |
+| Demo video | https://youtu.be/acvswntck9k |
+| GitHub repository link | https://github.com/Ines-karega/NextFit |
 
 ## Contents
 
@@ -83,8 +83,8 @@ Who can use what on the live website:
    Press Save profile.
 3. My matches opens. Read why each opportunity matched, the days left, and whether it is in your district.
 4. Use the search box and the type, province and district filters to narrow the list.
-5. Press Read the full advert to see the employer's original advert, and Apply (or
-   Copy email address when the opportunity is applied for by email).
+5. Press Apply to open the employer's own application page. When an opportunity is applied for by email,
+   follow the three steps on its card: Read the full advert to see what to send, Copy email address, then send it.
 6. Press Save to keep an opportunity in Saved. When its deadline is 14 days away or less, a
    deadline reminder appears on your pages.
 7. Open Browse all to see every open opportunity, including ones you do not fully qualify for, with what is
@@ -279,13 +279,17 @@ NextFit/
   everyone it matches, but never as being in a seeker's own district.
 - Expired opportunities are hidden automatically. Seekers never see an opportunity after its deadline (FR 4.2).
   In the admin's list it is marked Deadline passed, so an admin can close or remove it (FR 3.3).
-- Emails are checked for a complete format (for example `name@gmail.com`). NextFit does not send a confirmation
-  email at sign-up, so it cannot know whether a correctly written address really exists. Password reset links
-  only ever go to the registered address, so an account can only be recovered by whoever owns that inbox.
-  Capital letters in an email address don't matter: NextFit saves and compares addresses in lowercase.
+- Sign-up does not ask people to confirm their email address. This keeps signing up quick and simple for young
+  people with limited internet data or digital experience, as the SRS asks (section 2.3 and NFR 4, sign up and
+  profile in 7 minutes or less), and email confirmation is not one of the SRS requirements. NextFit still checks
+  that every address is written in full (for example `name@gmail.com`), and password reset links only ever go to
+  the registered address, so an account can only be recovered by whoever owns that inbox. Because no confirmation
+  is needed, an account can be created with an address that has no real mailbox; it works normally for logging
+  in, but it cannot use password reset. Capital letters in an email address don't matter: NextFit saves and
+  compares addresses in lowercase.
 - The website is in English, as set in the SRS (section 2.5).
 
 ## 12. Planned for later
 
-As listed in the SRS: a mobile app, SMS reminders, and collecting opportunities automatically from partner
-websites.
+As listed in the SRS: a mobile app, SMS reminders, collecting opportunities automatically from partner
+websites, and asking new users to confirm their email address when they sign up.
