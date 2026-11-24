@@ -2,8 +2,8 @@
 
 NextFit is a website that helps young Rwandans (aged 16 to 30) find the trainings, internships and jobs they
 already qualify for. A seeker fills in a short profile, and NextFit shows a personal list of opportunities that
-match their age, education level and skills, with the closest deadlines first, opportunities in their own
-district first, and a clear explanation of why each one matched.
+match their age, education level and skills, with their own district first, then the closest deadlines, and a
+clear explanation of why each one matched.
 
 ## Links
 
@@ -42,8 +42,15 @@ The solution. NextFit does the checking for them. There are two kinds of users:
 | Seeker | Sign up, fill in a profile, see their matches with the reasons, search and filter them, browse every open opportunity, save opportunities, get a reminder when a saved deadline is close, and reset a forgotten password. |
 | Admin | Add, edit, close and remove opportunities, see who added each one, view and remove user accounts, and create other admin accounts. Admins cannot sign up on the website: only an existing admin can create another. |
 
-Built with: Python and Flask for the server, HTML, CSS and JavaScript for the pages, and SQL for the data
-(SQLite on your own computer, PostgreSQL on the live website).
+### Technologies used
+
+| Part | Technology |
+|------|------------|
+| Server | Python, Flask |
+| Pages | HTML (Jinja templates), CSS, JavaScript |
+| Database | SQLite on your own computer, PostgreSQL on the live website (connected with psycopg) |
+| Hosting and emails | Vercel, Neon and Brevo (see section 7) |
+| Tests | Python's unittest |
 
 ## 2. How the matching works
 
@@ -83,7 +90,7 @@ Who can use what on the live website:
    Press Save profile.
 3. My matches opens. Read why each opportunity matched, the days left, and whether it is in your district.
 4. Use the search box and the type, province and district filters to narrow the list.
-5. Press Apply to open the employer's own application page. When an opportunity is applied for by email,
+5. Press Apply to open the page where you apply. When an opportunity is applied for by email,
    follow the three steps on its card: Read the full advert to see what to send, Copy email address, then send it.
 6. Press Save to keep an opportunity in Saved. When its deadline is 14 days away or less, a
    deadline reminder appears on your pages.
@@ -91,7 +98,7 @@ Who can use what on the live website:
    missing.
 8. Change your details any time in Profile; your matches update straight away.
 9. Forgot your password? On the Log in page, press Forgot your password? and enter your email. A reset
-   link arrives by email (check spam too) and works for 1 hour.
+   link arrives by email (check spam too). To test this, use an account made with your own email address.
 
 ### As an admin
 
@@ -102,9 +109,6 @@ Who can use what on the live website:
 3. Keep the list up to date: the list shows who added each opportunity. Listings whose deadline has passed are
    marked Deadline passed (seekers no longer see them). Use Edit, Close or Remove on any row.
 4. Manage users: open Users to see every account and remove one, or to create another admin.
-
-To test password reset yourself: sign up as a seeker with your own email address, then use
-Forgot your password? on the login page.
 
 ## 4. Run NextFit on your own computer, step by step
 
@@ -122,7 +126,7 @@ Requirements: Python 3.10 or newer, and Git.
    python -m venv venv
    venv\Scripts\Activate.ps1
    ```
-   If script execution is blocked, run `Set-ExecutionPolicy -Scope Process Bypass` first.
+   If script execution is blocked, run `Set-ExecutionPolicy -Scope Process Bypass` first (type Y if asked).
 
    Mac or Linux:
    ```
@@ -148,15 +152,15 @@ activate the virtual environment (the second line of step 2), then start the ser
 
 ### Demo accounts on your computer
 
-These accounts work only on a copy running on your own computer. They do not work on the live website.
-On the live website, sign up as a seeker with your own email instead (see section 3).
+The live website and the copy on your computer have separate databases, so an account made on one does not
+exist on the other. These accounts work only on your own copy, and accounts from the live website do not work here.
 
 | Role | Email | Password | What to try |
 |------|-------|----------|-------------|
 | Seeker | `seeker@nextfit.rw` | `Seeker123!` | My matches, the reasons, search, saving and reminders |
 | Admin | `admin@nextfit.rw` | `Admin123!` | Adding, editing and closing opportunities, and Users |
 
-You can also press Sign up to make your own seeker account.
+You can also press Create my free profile to make your own seeker account.
 
 ### Try a whole journey
 
@@ -166,8 +170,7 @@ You can also press Sign up to make your own seeker account.
 3. Open My matches: the new opportunity is there, with the reasons it matched.
 4. Press Save, then open Saved. If the deadline is 14 days away or less, you see a deadline reminder.
 
-Password reset on your computer: no email is sent. After Forgot your password?, the reset link is printed in
-the terminal where the server is running, so you can still try it (see section 8).
+To try password reset on your computer, see section 8.
 
 To start again with a fresh database: stop the website, delete `nextfit.db`, and start it again.
 
@@ -210,8 +213,7 @@ The last line should say `OK`.
 
 ## 7. How the live website is hosted
 
-The live website is already set up and running at https://nextfit.karega.tech. You don't need to do anything to
-use it. For reference, it uses three free services:
+The live website is already running. It uses three free services:
 
 | Service | What it does for NextFit |
 |---------|--------------------------|
@@ -227,20 +229,18 @@ On the live website, when someone presses Forgot your password?, NextFit emails 
 password. The link works for 1 hour.
 
 On a copy running on your own computer, no email is sent. Instead, the link is printed in the terminal where the
-server is running, so a developer can still try the whole reset. The link is never shown on the website itself,
-so on the live website only the owner of the email address can reset the password.
+server is running, so a developer can still try the whole reset. The link is never shown on the website itself.
 
 ## 9. Troubleshooting
 
 | Problem | What to do |
 |---------|------------|
-| Windows refuses to turn on the virtual environment (a red message about running scripts) | Run `Set-ExecutionPolicy -Scope Process Bypass`, then activate it again (step 2) |
 | `python` is not recognised | Use `py` (Windows) or `python3` (Mac or Linux), or reinstall Python with "Add python.exe to PATH" ticked |
-| The browser says "This site can't be reached" on 127.0.0.1:5000 | The server is not running: start it again (step 4) and keep the terminal open |
+| The browser says "This site can't be reached" on 127.0.0.1:5000 | The server is not running: start it again (section 4, step 4) and keep the terminal open |
+| "Address already in use" when starting the server | Another program is using port 5000. Close it, then start the server again. On a Mac, search for AirPlay Receiver in System Settings and turn it off |
 | The page looks old after an update | Press Ctrl + F5 to reload it fully |
 | "This email already has an account" | Log in instead, or use Forgot your password? |
-| The reset email did not arrive | Check the spam folder. On your own computer no email is sent: the link is printed in the terminal instead |
-| You want to start again | Stop the website, delete `nextfit.db`, and start it again |
+| The reset email did not arrive | Check the spam folder. On your own computer, see section 8 |
 
 ## 10. Project files
 
@@ -249,14 +249,15 @@ NextFit/
   backend/                  Python code that runs on the server
     app.py                  All the pages: sign up, log in, profile, matches, saved, admin
     matching.py             The three matching rules and the "why this matched you" explanation
-    db.py                   The only file that talks to the database (SQLite or PostgreSQL)
+    db.py                   Stores and reads the data (SQLite or PostgreSQL) and creates the first admin
     emailer.py              Sends the password reset email
-    seed.py                 Loads the starting listings and, on your computer, the demo accounts
+    seed.py                 Loads the starting listings and, on your computer, the demo seeker
     rwanda.py               Provinces, districts, education levels and other fixed lists
     real_opportunities.csv  The starting list of real opportunities, with the source of each one
   frontend/
     templates/              The HTML pages
     static/style.css        The look of the website
+    static/hero.jpg         The home page photo (Vitaly Gariev, Unsplash License)
     static/app.js           The district list, the phone Menu button, Show password and Copy email address
   tests/
     test_matching.py        Tests for the matching rules
@@ -267,18 +268,15 @@ NextFit/
 
 ## 11. Scope and design choices
 
-- Matching uses three rules. Only age, education and skills decide whether an opportunity is shown, as set in
-  the SRS (FR 4.1). District changes the order but never hides a match. When an advert also asks for years of
-  experience, its description says so, and the employer judges it.
+- Years of experience are not a matching rule; the three rules in section 2 are the ones set in the SRS (FR 4.1).
+  When an advert asks for experience, its description says so, and the employer judges it.
 - Skills are compared by their words. Capital letters never matter, and a skill counts as the same when all its
   words appear in the other one: "Excel" matches "MS Excel", and "Customer service" matches "Excellent customer
   service". Seekers write their own skills, and the employer checks them during their own application process.
 - Admins add every opportunity. As set in the SRS for this version (section 2.5), listings are entered by an
-  admin from real adverts, each with a link to the original. When an advert names the province but not the
+  admin from real adverts, each with a way to apply. When an advert names the province but not the
   district (for example it only says "Kigali"), the listing says "district not stated". It is still shown to
   everyone it matches, but never as being in a seeker's own district.
-- Expired opportunities are hidden automatically. Seekers never see an opportunity after its deadline (FR 4.2).
-  In the admin's list it is marked Deadline passed, so an admin can close or remove it (FR 3.3).
 - Sign-up does not ask people to confirm their email address. This keeps signing up quick and simple for young
   people with limited internet data or digital experience, as the SRS asks (section 2.3 and NFR 4, sign up and
   profile in 7 minutes or less), and email confirmation is not one of the SRS requirements. NextFit still checks

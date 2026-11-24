@@ -102,7 +102,7 @@ input[type=checkbox] { width: auto; }
 .hero { background: linear-gradient(135deg, var(--green) 0%, #14998d 100%); color: #fff; border-radius: 18px; padding: 36px 24px; margin-bottom: 8px; box-shadow: var(--shadow); }
 .hero h1 { font-size: 32px; color: #fff; }
 .hero p { font-size: 18px; max-width: 620px; opacity: 0.95; }
-.hero .actions { margin-top: 20px; }
+.hero .actions { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .hero .button.grey { background: rgba(255, 255, 255, 0.2); color: #fff; }
 .hero .button.grey:hover { background: rgba(255, 255, 255, 0.32); }
 .hero .button.grey:hover { background: rgba(255, 255, 255, 0.32); }
